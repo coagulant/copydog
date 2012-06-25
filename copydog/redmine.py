@@ -44,19 +44,20 @@ class Redmine(ApiClient):
             if kwargs.get('sort'):
                 kwargs['sort'] += ':desc'
 
-        return self.get('issues', **kwargs)
+        issues = self.get('issues', **kwargs)['issues']
+        return [Issue(self, **data) for data in issues]
 
     def projects(self):
         """ Get a list of projects
         """
         projects = self.get('projects')['projects']
-        return [Project(self, data) for data in projects]
+        return [Project(self, **data) for data in projects]
 
     def trackers(self):
         """ Get a list of trackers
         """
         trackers = self.get('trackers')['trackers']
-        return [Tracker(self, data) for data in trackers]
+        return [Tracker(self, **data) for data in trackers]
 
 
 class Project(ApiObject):
@@ -65,4 +66,13 @@ class Project(ApiObject):
 
 class Tracker(ApiObject):
     """ Redmine tracker"""
+
+
+class Issue(ApiObject):
+    """ Redmine issue
+
+        :param id: issue's unique id
+        :param subject: issue name
+        :param description: description
+    """
 

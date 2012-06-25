@@ -7,7 +7,7 @@ class ApiException(Exception):
 
 
 class ApiObject(object):
-    def __init__(self, client, data):
+    def __init__(self, client, **data):
         """ Abstract API object constructor.
 
         :param client: API client
@@ -15,13 +15,14 @@ class ApiObject(object):
         """
         self.__dict__.update(data)
         self.client = client
-        self.__id = getattr(self, 'name', getattr(self, 'id', ''))
+        self.id = data.get('id')
+        self.__uid = getattr(self, 'name', self.id)
 
     def __repr__(self):
         return unicode(self).encode('utf-8')
 
     def __unicode__(self):
-        return u'<{class_name} {identifier}>'.format(class_name=self.__class__.__name__, identifier=self.__id)
+        return u'<{class_name} {identifier}>'.format(class_name=self.__class__.__name__, identifier=self.__uid)
 
 
 class ApiClient(object):

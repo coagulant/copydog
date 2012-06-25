@@ -11,8 +11,8 @@ class Trello(ApiClient):
     def __init__(self, api_key=None, token=None):
         """ Creates api client instance.
 
-        :api_key: Developer API key for Trello. Can be obtained at https://trello.com/1/appKey/generate
-        :token: Authorization token with read or read-write access for some period of time
+        :param api_key: Developer API key for Trello. Can be obtained at https://trello.com/1/appKey/generate
+        :param token: Authorization token with read or read-write access for some period of time
                 https://trello.com/docs/gettingstarted/index.html#token
         """
         self.api_key = api_key
@@ -26,11 +26,28 @@ class Trello(ApiClient):
         return '{host}/{path}'.format(host=self.host.strip('/'), path=path)
 
     def boards(self):
-        """ Get a list of board
+        """ Get a list of boards
         """
         json = self.get('members/me/boards/')
-        return [Board(self, data) for data in json]
+        return [Board(self, **data) for data in json]
 
 
 class Board(ApiObject):
     """ Trello board """
+
+    def __init__(self, client, **data):
+        super(Board, self).__init__(client, **data)
+
+
+class Card(ApiObject):
+    """ Trello card
+
+        :param id: card's unique hash
+        :param name: card's name
+        :param desc: description
+        :param url: URL
+    """
+
+
+class List(ApiObject):
+    """ Trello list"""
