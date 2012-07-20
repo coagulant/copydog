@@ -7,7 +7,7 @@ class ApiException(Exception):
 
 
 class ApiObject(object):
-    def __init__(self, client, **data):
+    def __init__(self, client=None, **data):
         """ Abstract API object constructor.
 
         :param client: API client
@@ -23,6 +23,9 @@ class ApiObject(object):
 
     def __unicode__(self):
         return u'<{class_name} {identifier}>'.format(class_name=self.__class__.__name__, identifier=self.__uid)
+
+    def as_dict(self):
+        raise NotImplemented
 
 
 class ApiClient(object):
