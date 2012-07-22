@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from .basic import ApiObject, ApiException, ApiClient
+from .api import ApiObject, ApiException, ApiClient
 
 
 class RedmineException(ApiException):

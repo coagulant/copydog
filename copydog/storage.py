@@ -12,8 +12,8 @@ class Storage(object):
     def get_item_id(self, service_name, id):
         return self.redis.hget('{service_name}:items:{id}'.format(service_name=service_name, id=id), 'foreign_id')
 
-    def get_item_list_id(self, service_name, opposite_id):
-        return self.redis.hget('{service_name}:lists:{id}'.format(service_name=service_name, id=id), opposite_id)
+    def get_item_list_id(self, service_name, id):
+        return self.redis.hget('{service_name}:list_status_mapping'.format(service_name=service_name), id)
 
     def get_last_time_read(self, service_name):
         return self.redis.get('{service_name}:last_read_time')
@@ -33,7 +33,7 @@ class Mapper(object):
         card = Card(
             id = self.storage.get_item_id(service_from, issue.id),
             idMembers = [None],
-            name = issue.title,
+            name = issue.subject,
             desc = issue.description,
             idList = self.storage.get_item_list_id(service_from, issue.status['id']),
             idBoard = self.config.default_board_id,
@@ -49,7 +49,7 @@ class Mapper(object):
         issue = Issue(
             id = self.storage.get_item_id(service_from, card.id),
             assigned_to = None,
-            title = card.name,
+            subject = card.name,
             description = card.desc,
             status_id = self.storage.get_item_list_id(service_from, card.idList),
             project_id = self.config.default_project_id,

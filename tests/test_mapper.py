@@ -20,7 +20,7 @@ class MapperIssueToCardTest(TestCase):
         })
         self.issue = Issue(**{
             'id': 6571,
-            'title': 'Save humanity',
+            'subject': 'Save humanity',
             'description': 'Humanity in danger',
             'due_date': datetime.date(2012, 12, 20),
             'status': {'name': "Assigned", 'id': 2}
@@ -86,8 +86,8 @@ class MapperCardToIssueTest(TestCase):
     def test_card_idMembers(self):
         self.assertEqual(self.redmine_issue.assigned_to, None)
 
-    def test_card_title(self):
-        self.assertEqual(self.redmine_issue.title, 'Destroy humanity')
+    def test_card_subject(self):
+        self.assertEqual(self.redmine_issue.subject, 'Destroy humanity')
 
     def test_card_description(self):
         self.assertEqual(self.redmine_issue.description, 'Humanity in our enemy')

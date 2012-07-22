@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
+from logging import getLogger
 import requests
+from requests.exceptions import HTTPError
+
+log = getLogger(__name__)
 
 
 class ApiException(Exception):
@@ -15,8 +19,9 @@ class ApiObject(object):
         """
         self._data = data
         self.client = client
-        self.id = data.get('id')
-        self.__uid = data.get('name', self.id)
+        self.__uid = data.get('name', data.get('id'))
+        self.validate()
+        log.debug('Created API object %s' % repr(self))
 
     def __getattr__(self, attr):
         return self._data[attr]
@@ -26,6 +31,9 @@ class ApiObject(object):
 
     def __unicode__(self):
         return u'<{class_name} {identifier}>'.format(class_name=self.__class__.__name__, identifier=self.__uid)
+
+    def validate(self):
+        """ Validate created object"""
 
     def as_dict(self):
         raise NotImplemented
@@ -51,8 +59,13 @@ class ApiClient(object):
 
     def method(self, method, path, data=None, **payload):
         payload.update(self.default_payload())
-        response = requests.request(method=method, url=self.build_api_url(path), params=payload)
-        response.raise_for_status()
+        response = requests.request(method=method, url=self.build_api_url(path), data=data, params=payload)
+        try:
+            response.raise_for_status()
+        except HTTPError as e:
+            log.error(e.response.text)
+            raise e
+
         if response.json:
             return response.json
         else:

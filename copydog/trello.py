@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from .basic import ApiObject, ApiException, ApiClient
+from .api import ApiObject, ApiException, ApiClient
 
 
 class TrelloException(ApiException):
@@ -50,11 +50,16 @@ class Board(ApiObject):
 class Card(ApiObject):
     """ Trello card
 
-        :param id: card's unique hash
+        :param id: (optional) card's unique hash
         :param name: card's name
-        :param desc: description
-        :param url: URL
+        :param desc: (optional) description
+        :param idList: list id
+        :param url: (optional) URL
     """
+
+    def validate(self):
+        assert self.name is not None
+        assert self.idList is not None
 
     def save(self):
         """ Save new card
@@ -63,7 +68,7 @@ class Card(ApiObject):
             method = 'put'
         else:
             method = 'post'
-        self.client.method(method, 'cards', self._data)
+        self.client.method(method, path='cards', data=self._data)
 
 
 class List(ApiObject):
