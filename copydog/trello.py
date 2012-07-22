@@ -31,6 +31,14 @@ class Trello(ApiClient):
         json = self.get('members/me/boards/')
         return [Board(self, **data) for data in json]
 
+    def cards(self, board_id, **kwargs):
+        """ Get a list of cards
+
+        :param board_id: The id of board to look for cards
+        """
+        json = self.get('boards/{board_id}/cards/'.format(board_id=board_id))
+        return [Card(self, **data) for data in json]
+
 
 class Board(ApiObject):
     """ Trello board """
@@ -47,6 +55,15 @@ class Card(ApiObject):
         :param desc: description
         :param url: URL
     """
+
+    def save(self):
+        """ Save new card
+        """
+        if self.id:
+            method = 'put'
+        else:
+            method = 'post'
+        self.client.method(method, 'cards', self._data)
 
 
 class List(ApiObject):

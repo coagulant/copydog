@@ -23,6 +23,9 @@ Note, that some tests make actual API requests, so you need to setup some env va
 
 ``TRELLO_TOKEN`` - your `consumer token <https://trello.com/docs/gettingstarted/index.html#getting-a-token-from-a-user>`_ to access Trello API ()
 
+You also need redis server running with default configuration.
+
+
 Indices and tables
 ==================
 
