@@ -27,6 +27,7 @@ class Watch(object):
     def read_redmine(self):
         issues = self.clients['redmine'].issues(updated__after=self.storage.get_last_time_read('redmine'),
                                                 project_id=self.config.default_project_id)
+        self.storage.mark_read(issues)
         log.debug('Read %s issues from Redmine', len(issues))
         return issues
 

@@ -16,7 +16,15 @@ class Storage(object):
         return self.redis.hget('{service_name}:list_status_mapping'.format(service_name=service_name), id)
 
     def get_last_time_read(self, service_name):
-        return self.redis.get('{service_name}:last_read_time')
+        return self.redis.get('{service_name}:last_read_time'.format(service_name))
+
+    def mark_read(self, service_name, items):
+        pipe = self.redis.pipeline()
+        for item in items:
+            pipe.hset('{service_name}:items:{id}'.format(service_name=service_name, id=id),
+                'updated', item.last_updated())
+        pipe.execute()
+
 
 
 class Mapper(object):

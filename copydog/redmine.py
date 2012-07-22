@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import time
+from dateutil.parser import parse
 from .api import ApiObject, ApiException, ApiClient
 
 
@@ -77,7 +79,15 @@ class Issue(ApiObject):
         :param subject: issue name
         :param description: description
     """
+    def __init__(self, client=None, **data):
+        if data.get('created_on'):
+            data['created_on'] = parse(data['created_on'])
+        super(Issue, self).__init__(client, **data)
 
     def save(self):
         pass
+
+    @property
+    def last_updated(self):
+        return self.updated_on
 

@@ -70,6 +70,10 @@ class Card(ApiObject):
             method = 'post'
         self.client.method(method, path='cards', data=self._data)
 
+    @property
+    def last_updated(self):
+        return self.actions[0].date
+
 
 class List(ApiObject):
     """ Trello list"""
