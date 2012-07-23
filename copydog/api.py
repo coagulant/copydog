@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-from logging import getLogger
 import requests
-from requests.exceptions import HTTPError
-
+from logging import getLogger
+from dateutil.parser import parse
 log = getLogger(__name__)
 
 
@@ -10,21 +9,36 @@ class ApiException(Exception):
     """ Error, raised by API wrapper """
 
 
+class MissingProperty(ApiException):
+    """ API object is missing property"""
+
+    def __str__(self):
+        return 'API object {0} is missing attribute "{1}"'.format(*self.args)
+
 class ApiObject(object):
+    date_fields = tuple()
+
     def __init__(self, client=None, **data):
         """ Abstract API object constructor.
 
         :param client: API client
         :param data: object internals
         """
+        data = self.prepare_dates(data)
         self._data = data
         self.client = client
         self.__uid = data.get('name', data.get('id'))
         self.validate()
-        log.debug('Created API object %s' % repr(self))
+        log.debug('Instantiated API object %s' % repr(self))
 
     def __getattr__(self, attr):
-        return self._data[attr]
+        try:
+            return self._data[attr]
+        except KeyError:
+            raise MissingProperty(self, attr)
+
+    def get(self, attr, default=None):
+        return self._data.get('attr', default)
 
     def __repr__(self):
         return unicode(self).encode('utf-8')
@@ -35,8 +49,11 @@ class ApiObject(object):
     def validate(self):
         """ Validate created object"""
 
-    def as_dict(self):
-        raise NotImplemented
+    def prepare_dates(self, data):
+        for field in self.date_fields:
+            if data.get(field):
+                data[field] = parse(data[field])
+        return data
 
 
 class ApiClient(object):
@@ -62,7 +79,7 @@ class ApiClient(object):
         response = requests.request(method=method, url=self.build_api_url(path), data=data, params=payload)
         try:
             response.raise_for_status()
-        except HTTPError as e:
+        except requests.exceptions.HTTPError as e:
             log.error(e.response.text)
             raise e
 

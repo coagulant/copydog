@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from logging import getLogger
+from dateutil.parser import parse
 from copydog.redmine import Redmine
 from copydog.storage import Storage, Mapper
 from copydog.trello import Trello
@@ -25,19 +26,21 @@ class Watch(object):
         #self.write_redmine(cards)
 
     def read_redmine(self):
-        issues = self.clients['redmine'].issues(updated__after=self.storage.get_last_time_read('redmine'),
+        last_read = parse(self.storage.get_last_time_read('redmine'))
+        issues = self.clients['redmine'].issues(updated__after=last_read,
                                                 project_id=self.config.default_project_id)
-        self.storage.mark_read(issues)
-        log.debug('Read %s issues from Redmine', len(issues))
+        self.storage.mark_read('redmine', issues)
+        log.debug('Read %s issues from Redmine since %s', len(issues), last_read)
         return issues
 
     def write_trello(self, issues):
         for issue in issues:
             card = self.mapper.issue_to_trello(issue)
-            log.debug('%s', issue.__dict__)
             log.debug('Saving issue %s to Trello', issue.id)
             log.debug('%s', card._data)
             card.save()
+            self.storage.mark_written('trello', card, issue.id)
+            log.debug('%s', card._data)
 
     def read_trello(self):
 

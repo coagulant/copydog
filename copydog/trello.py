@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from dateutil.parser import parse
 from .api import ApiObject, ApiException, ApiClient
 
 
@@ -68,11 +69,13 @@ class Card(ApiObject):
             method = 'put'
         else:
             method = 'post'
-        self.client.method(method, path='cards', data=self._data)
+        result = self.client.method(method, path='cards', data=self._data)
+        self._data = result
+        return result
 
     @property
     def last_updated(self):
-        return self.actions[0].date
+        return parse(self.actions[0].date)
 
 
 class List(ApiObject):

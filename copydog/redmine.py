@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-import time
-from dateutil.parser import parse
 from .api import ApiObject, ApiException, ApiClient
 
 
@@ -46,7 +44,7 @@ class Redmine(ApiClient):
         if inverse and kwargs.get('sort'):
             kwargs['sort'] += ':desc'
         if updated__after:
-            kwargs['updated_on'] = '>={0}'.format(updated__after.isoformat())
+            kwargs['updated_on'] = '>={0}'.format(updated__after.date().isoformat())
 
         issues = self.get('issues', **kwargs)['issues']
         return [Issue(self, **data) for data in issues]
@@ -79,10 +77,7 @@ class Issue(ApiObject):
         :param subject: issue name
         :param description: description
     """
-    def __init__(self, client=None, **data):
-        if data.get('created_on'):
-            data['created_on'] = parse(data['created_on'])
-        super(Issue, self).__init__(client, **data)
+    date_fields = ('updated_on', 'created_on')
 
     def save(self):
         pass

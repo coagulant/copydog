@@ -21,6 +21,12 @@ def main():
     issues = dict((key, storage.redis.hgetall(key)) for key in redmine_keys)
     cards = dict((key, storage.redis.hgetall(key)) for key in trello_keys)
 
+    print 'Copydog storage'
+    print '==============='
+
+    print 'Redmine last read at %s' % storage.get_last_time_read('redmine')
+    print 'Trello last read at %s' % storage.get_last_time_read('trello')
+
     print_table('redmine', issues)
     print_table('trello', cards)
 

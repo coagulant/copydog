@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import datetime
 import redis
 from copydog.redmine import Issue
 from copydog.trello import Card
@@ -9,22 +10,31 @@ class Storage(object):
     def __init__(self):
         self.redis = redis.StrictRedis()
 
-    def get_item_id(self, service_name, id):
-        return self.redis.hget('{service_name}:items:{id}'.format(service_name=service_name, id=id), 'foreign_id')
+    def get_opposite_item_id(self, service_name, id):
+        return self.redis.hget('{service_name}:items:{id}'.format(service_name=service_name, id=id), 'opposite_id')
 
     def get_item_list_id(self, service_name, id):
         return self.redis.hget('{service_name}:list_status_mapping'.format(service_name=service_name), id)
 
     def get_last_time_read(self, service_name):
-        return self.redis.get('{service_name}:last_read_time'.format(service_name))
+        return self.redis.get('{service_name}:last_read_time'.format(service_name=service_name))
 
     def mark_read(self, service_name, items):
         pipe = self.redis.pipeline()
+        pipe.set('{service_name}:last_read_time'.format(service_name=service_name), datetime.datetime.now())
         for item in items:
-            pipe.hset('{service_name}:items:{id}'.format(service_name=service_name, id=id),
-                'updated', item.last_updated())
+            pipe.hset('{service_name}:items:{id}'.format(service_name=service_name, id=item.id),
+                      'updated', item.last_updated)
         pipe.execute()
 
+    def mark_written(self, service_name, item, foreign_id):
+        other_service = 'redmine' if service_name == 'trello' else 'trello'
+        pipe = self.redis.pipeline()
+        pipe.hmset('{service_name}:items:{id}'.format(service_name=service_name, id=item.id),
+                  {'opposite_id': foreign_id, 'updated': item.last_updated})
+        pipe.hset('{other_service}:items:{id}'.format(other_service=other_service, id=foreign_id),
+                  'opposite_id', item.id)
+        pipe.execute()
 
 
 class Mapper(object):
@@ -39,14 +49,14 @@ class Mapper(object):
         service_from = 'redmine'
         service_to = 'trello'
         card = Card(
-            id = self.storage.get_item_id(service_from, issue.id),
+            id = self.storage.get_opposite_item_id(service_from, issue.id),
             idMembers = [None],
             name = issue.subject,
             desc = issue.description,
             idList = self.storage.get_item_list_id(service_from, issue.status['id']),
             idBoard = self.config.default_board_id,
-            due = issue.due_date,
-            client = self.clients[service_to]
+            due = issue.get('due_date'),
+            client = self.clients[service_to],
         )
         return card
 
@@ -55,13 +65,13 @@ class Mapper(object):
         service_from = 'trello'
         service_to = 'redmine'
         issue = Issue(
-            id = self.storage.get_item_id(service_from, card.id),
+            id = self.storage.get_opposite_item_id(service_from, card.id),
             assigned_to = None,
             subject = card.name,
             description = card.desc,
             status_id = self.storage.get_item_list_id(service_from, card.idList),
             project_id = self.config.default_project_id,
-            due_date = card.due,
+            due_date = card.get('due'),
             client = self.clients[service_to]
         )
         return issue
