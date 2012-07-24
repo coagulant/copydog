@@ -22,8 +22,8 @@ class Watch(object):
         issues = self.read_redmine()
         self.write_trello(issues)
 
-        #cards = self.read_trello()
-        #self.write_redmine(cards)
+        cards = self.read_trello()
+        self.write_redmine(cards)
 
     def read_redmine(self):
         last_read = self.storage.get_last_time_read('redmine')
@@ -41,14 +41,20 @@ class Watch(object):
             card.save()
             card.fetch()
             self.storage.mark_written('trello', card, foreign_id=issue.id)
-            log.debug('%s', card._data)
 
     def read_trello(self):
-
-        cards = self.clients['trello'].cards(board_id=self.config.default_board_id)
+        last_read = self.storage.get_last_time_read('trello')
+        cards = self.clients['trello'].cards(updated__after=last_read,
+                                             board_id=self.config.default_board_id, actions='all')
+        self.storage.mark_read('trello', cards)
         return cards
 
     def write_redmine(self, cards):
         for card in cards:
-            issue = card.as_card()
-            print issue.save()
+            log.debug('%s', card._data)
+            issue = self.mapper.card_to_redmine(card)
+            log.debug('Saving card %s to Redmine', card.id)
+            log.debug('%s', issue._data)
+            issue.save()
+            log.debug('%s', issue._data)
+            self.storage.mark_written('redmine', issue, foreign_id=card.id)

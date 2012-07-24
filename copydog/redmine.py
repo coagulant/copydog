@@ -80,7 +80,17 @@ class Issue(ApiObject):
     date_fields = ('updated_on', 'created_on')
 
     def save(self):
-        pass
+        """ Save new issue
+        """
+        if self.id:
+            method = 'put'
+        else:
+            method = 'post'
+        #fixme: redmine expects JSON in post
+        result = self.client.method(method, path='issues', data=self._data)
+        self._data = result
+        return result
+
 
     @property
     def last_updated(self):

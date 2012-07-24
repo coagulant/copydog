@@ -27,7 +27,7 @@ class ApiObject(object):
         data = self.prepare_dates(data)
         self._data = data
         self.client = client
-        self.__uid = data.get('name', data.get('id'))
+        self.__uid = data.get('name', data.get('subject') or data.get('id'))
         self.validate()
         log.debug('Instantiated API object %s' % repr(self))
 

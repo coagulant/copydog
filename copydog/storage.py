@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime
 from dateutil.parser import parse
+import pytz
 import redis
 from copydog.redmine import Issue
 from copydog.trello import Card
@@ -25,7 +26,8 @@ class Storage(object):
 
     def mark_read(self, service_name, items):
         pipe = self.redis.pipeline()
-        pipe.set('{service_name}:last_read_time'.format(service_name=service_name), datetime.datetime.now())
+        pipe.set('{service_name}:last_read_time'.format(service_name=service_name),
+            datetime.datetime.utcnow().replace(tzinfo = pytz.utc))
         for item in items:
             pipe.hset('{service_name}:items:{id}'.format(service_name=service_name, id=item.id),
                       'updated', item.last_updated)

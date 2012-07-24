@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
+from logging import getLogger
 from dateutil.parser import parse
 from .api import ApiObject, ApiException, ApiClient
+log = getLogger('copydog.api')
 
 
 class TrelloException(ApiException):
@@ -37,8 +39,16 @@ class Trello(ApiClient):
 
         :param board_id: The id of board to look for cards
         """
-        json = self.get('boards/{board_id}/cards/'.format(board_id=board_id))
-        return [Card(self, **data) for data in json]
+        json = self.get('boards/{board_id}/cards/'.format(board_id=board_id), **kwargs)
+        cards = [Card(self, **data) for data in json]
+        log.debug('Got whole lot of %s cards from Trello board', len(cards))
+
+        updated__after = kwargs.get('updated__after')
+        if updated__after:
+            cards = filter(lambda card: updated__after and card.last_updated > updated__after, cards)
+            log.debug('Read %s cards from Trello since %s', len(cards), updated__after)
+
+        return cards
 
 
 class Board(ApiObject):
