@@ -31,7 +31,7 @@ class MapperIssueToCardTest(TestCase):
         return self.mapper.issue_to_trello(self.issue)
 
     def test_new_card_id(self):
-        self.storage_mock.get_item_id.return_value = '777'
+        self.storage_mock.get_opposite_item_id.return_value = '777'
         self.assertEqual(self.trello_card.id, '777')
 
     def test_card_idMembers(self):
@@ -80,7 +80,7 @@ class MapperCardToIssueTest(TestCase):
         return self.mapper.card_to_redmine(self.issue)
 
     def test_new_card_id(self):
-        self.storage_mock.get_item_id.return_value = '555'
+        self.storage_mock.get_opposite_item_id.return_value = '555'
         self.assertEqual(self.redmine_issue.id, '555')
 
     def test_card_idMembers(self):

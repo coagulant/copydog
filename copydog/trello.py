@@ -73,9 +73,18 @@ class Card(ApiObject):
         self._data = result
         return result
 
+    def fetch(self):
+        """ Fetch fresh info about the card
+
+        We need it, because save method doesn't return card timestamp.
+        """
+        result = self.client.get('cards/{card_id}'.format(card_id=self.id), actions='all')
+        self._data = result
+        return result
+
     @property
     def last_updated(self):
-        return parse(self.actions[0].date)
+        return parse(self.actions[0]['date'])
 
 
 class List(ApiObject):

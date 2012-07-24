@@ -38,7 +38,7 @@ class ApiObject(object):
             raise MissingProperty(self, attr)
 
     def get(self, attr, default=None):
-        return self._data.get('attr', default)
+        return self._data.get(attr, default)
 
     def __repr__(self):
         return unicode(self).encode('utf-8')

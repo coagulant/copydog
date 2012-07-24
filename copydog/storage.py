@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime
+from dateutil.parser import parse
 import redis
 from copydog.redmine import Issue
 from copydog.trello import Card
@@ -17,7 +18,10 @@ class Storage(object):
         return self.redis.hget('{service_name}:list_status_mapping'.format(service_name=service_name), id)
 
     def get_last_time_read(self, service_name):
-        return self.redis.get('{service_name}:last_read_time'.format(service_name=service_name))
+        value = self.redis.get('{service_name}:last_read_time'.format(service_name=service_name))
+        if value:
+            return parse(value)
+        return None
 
     def mark_read(self, service_name, items):
         pipe = self.redis.pipeline()

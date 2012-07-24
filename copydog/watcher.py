@@ -26,7 +26,7 @@ class Watch(object):
         #self.write_redmine(cards)
 
     def read_redmine(self):
-        last_read = parse(self.storage.get_last_time_read('redmine'))
+        last_read = self.storage.get_last_time_read('redmine')
         issues = self.clients['redmine'].issues(updated__after=last_read,
                                                 project_id=self.config.default_project_id)
         self.storage.mark_read('redmine', issues)
@@ -39,7 +39,8 @@ class Watch(object):
             log.debug('Saving issue %s to Trello', issue.id)
             log.debug('%s', card._data)
             card.save()
-            self.storage.mark_written('trello', card, issue.id)
+            card.fetch()
+            self.storage.mark_written('trello', card, foreign_id=issue.id)
             log.debug('%s', card._data)
 
     def read_trello(self):
