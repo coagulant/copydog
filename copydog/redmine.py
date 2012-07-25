@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
+import json
+from logging import getLogger
 from .api import ApiObject, ApiException, ApiClient
+log = getLogger('copydog.api')
 
 
 class RedmineException(ApiException):
@@ -26,6 +29,13 @@ class Redmine(ApiClient):
 
     def build_api_url(self, path):
         return '{host}/{path}.json'.format(host=self.host.strip('/'), path=path)
+
+    def post(self, path, data=None, **payload):
+        log.info(json.dumps(data))
+        return self.method('post', path, json.dumps(data), headers={'Content-Type': 'application/json'}, **payload)
+
+    def put(self, path, data=None, **payload):
+        return self.method('put', path, json.dumps(data), headers={'Content-Type': 'application/json'}, **payload)
 
     def issues(self, inverse=None, updated__after=None, **kwargs):
         """ Get a list of issues
@@ -81,13 +91,24 @@ class Issue(ApiObject):
 
     def save(self):
         """ Save new issue
+
+        Redmine expects:
+        {
+            "issue": {
+                "project_id": "example",
+                "subject": "Test issue",
+                "custom_field_values":{
+                    "1":"1.1.3"  #the affected version field
+                }
+            }
+        }
         """
-        if self.id:
+        if self.get('id'):
             method = 'put'
         else:
             method = 'post'
-        #fixme: redmine expects JSON in post
-        result = self.client.method(method, path='issues', data=self._data)
+
+        result = getattr(self.client, method)(path='issues', data={'issue': self._data})
         self._data = result
         return result
 

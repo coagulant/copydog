@@ -69,14 +69,15 @@ class ApiClient(object):
         return self.method('get', path, **payload)
 
     def post(self, path, data=None, **payload):
-        return self.method('get', path, data, **payload)
+        return self.method('post', path, data, **payload)
 
     def put(self, path, data=None, **payload):
-        return self.method('get', path, data, **payload)
+        return self.method('put', path, data, **payload)
 
-    def method(self, method, path, data=None, **payload):
+    def method(self, method, path, data=None, headers=None, **payload):
         payload.update(self.default_payload())
-        response = requests.request(method=method, url=self.build_api_url(path), data=data, params=payload)
+        response = requests.request(method=method, url=self.build_api_url(path),
+            headers=headers, data=data, params=payload)
         try:
             response.raise_for_status()
         except requests.exceptions.HTTPError as e:
@@ -87,3 +88,4 @@ class ApiClient(object):
             return response.json
         else:
             raise ApiException
+

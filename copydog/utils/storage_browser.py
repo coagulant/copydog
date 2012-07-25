@@ -13,6 +13,7 @@ def print_table(prefix, redmine_items):
         table.add_row([key, values.get('updated'), values.get('opposite_id')])
     print table.draw() + "\n"
 
+
 def main():
     storage = Storage()
     redmine_keys = storage.redis.keys(pattern='redmine:items*')

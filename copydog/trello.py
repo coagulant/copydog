@@ -75,7 +75,7 @@ class Card(ApiObject):
     def save(self):
         """ Save new card
         """
-        if self.id:
+        if self.get('id'):
             method = 'put'
         else:
             method = 'post'

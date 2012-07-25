@@ -32,9 +32,10 @@ class TestRedmine(TestCase):
         pprint.pprint(issues)
 
 
+
 class TestIssue(TestCase):
 
-    def test_create(self):
+    def test_init(self):
         json = {u'status': {u'name': u'Assigned', u'id': 2},
                 u'due_date': u'2012/07/23',
                 u'description': u"Issue's description",
@@ -54,3 +55,8 @@ class TestIssue(TestCase):
                 u'done_ratio': 0,
                 u'priority': {u'name': u'\u041d\u043e\u0440\u043c\u0430\u043b\u044c\u043d\u044b\u0439', u'id': 4}}
         self.assertEqual(Issue(**json).created_on, datetime.datetime(2012, 7, 22, 16,17,37, tzinfo=tzoffset(None, 14400)))
+
+#    def test_save(self):
+#        client = Redmine(host=os.environ.get('REDMINE_HOST'), api_key=os.environ.get('REDMINE_API_KEY'))
+#        issue = Issue(client=client, subject='Test subject', description='Test description', project_id='playground')
+#        issue.save()
