@@ -77,11 +77,13 @@ class ApiClient(object):
     def method(self, method, path, data=None, headers=None, **payload):
         payload.update(self.default_payload())
         response = requests.request(method=method, url=self.build_api_url(path),
-            headers=headers, data=data, params=payload)
+                                    headers=headers, data=data, params=payload)
+        log.debug('Request: [%s] %s', response.request.method, response.request.full_url)
+        log.debug('Request data: %s', response.request.data)
         try:
             response.raise_for_status()
         except requests.exceptions.HTTPError as e:
-            log.error(e.response.text)
+            log.error('Request failed: %s', e.response.content)
             raise e
 
         if response.json:

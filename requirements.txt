@@ -1,9 +1,11 @@
 requests==0.13.1
-nose==1.1.2
-sphinx==1.1.3
 redis==2.6
-mock==1.0b1
 pytz==2012c
+docopt==0.4.1
+PyYAML==3.10
 
 #dev
+nose==1.1.2
+mock==1.0b1
+sphinx==1.1.3
 texttable==0.8.1

@@ -46,7 +46,6 @@ class Trello(ApiClient):
         updated__after = kwargs.get('updated__after')
         if updated__after:
             cards = filter(lambda card: updated__after and card.last_updated > updated__after, cards)
-            log.debug('Read %s cards from Trello since %s', len(cards), updated__after)
 
         return cards
 
@@ -76,10 +75,10 @@ class Card(ApiObject):
         """ Save new card
         """
         if self.get('id'):
-            method = 'put'
+            result = self.client.put(path='cards/{card_id}'.format(card_id=self.id), data=self._data)
         else:
-            method = 'post'
-        result = self.client.method(method, path='cards', data=self._data)
+            result = self.client.post(path='cards', data=self._data)
+
         self._data = result
         return result
 

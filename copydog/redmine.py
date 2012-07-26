@@ -104,11 +104,10 @@ class Issue(ApiObject):
         }
         """
         if self.get('id'):
-            method = 'put'
+            result = self.client.put(path='issues/{issue_id}'.format(issue_id=self.id), data={'issue': self._data})
         else:
-            method = 'post'
+            result = self.client.post(path='issues', data={'issue': self._data})
 
-        result = getattr(self.client, method)(path='issues', data={'issue': self._data})
         self._data = result
         return result
 

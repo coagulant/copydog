@@ -9,8 +9,10 @@ from copydog.trello import Card
 
 class Storage(object):
 
-    def __init__(self):
-        self.redis = redis.StrictRedis()
+    def __init__(self, config):
+        if not config:
+            config  = {}
+        self.redis = redis.StrictRedis(**config)
 
     def get_opposite_item_id(self, service_name, id):
         return self.redis.hget('{service_name}:items:{id}'.format(service_name=service_name, id=id), 'opposite_id')
@@ -60,8 +62,8 @@ class Mapper(object):
             name = issue.subject,
             desc = issue.description,
             idList = self.storage.get_item_list_id(service_from, issue.status['id']),
-            idBoard = self.config.default_board_id,
-            due = issue.get('due_date'),
+            idBoard = self.config.require('clients.trello.board_id'),
+            due = issue.get('due_date', 'null'),
             client = self.clients[service_to],
         )
         return card
@@ -76,7 +78,7 @@ class Mapper(object):
             subject = card.name,
             description = card.desc,
             status_id = self.storage.get_item_list_id(service_from, card.idList),
-            project_id = self.config.default_project_id,
+            project_id = self.config.require('clients.redmine.project_id'),
             due_date = card.get('due'),
             client = self.clients[service_to]
         )
