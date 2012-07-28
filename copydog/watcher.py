@@ -21,7 +21,20 @@ class Watch(object):
         }
         self.mapper = Mapper(storage=self.storage, clients=self.clients, config=self.config)
 
+    def save_list_status_mapping(self):
+        statuses = self.clients['redmine'].statuses()
+        lists = self.clients['trello'].lists(self.config.require('clients.trello.board_id'))
+        for status in statuses:
+            for list in lists:
+                if status.name == list.name:
+                    self.storage.set_list_or_status_id(redmine_id=status.id, trello_id=list.id)
+                    log.debug('Mapped Status %s to Trello', status.name)
+                    break
+            else:
+                log.warning('Status %s not mapped to Trello', status.name)
+
     def run(self):
+        self.save_list_status_mapping()
         if self.config.get('clients.trello.write'):
             issues = self.read_redmine()
             if issues:
@@ -56,7 +69,7 @@ class Watch(object):
     def read_trello(self):
         last_read = self.storage.get_last_time_read('trello')
         cards = self.clients['trello'].cards(updated__after=last_read,
-                                             board_id=self.config.get('clients.trello.board_id'),
+                                             board_id=self.config.require('clients.trello.board_id'),
                                              actions='all')
         self.storage.mark_read('trello', cards)
         log.info('Read %s new cards from Trello since %s', len(cards), last_read.strftime('%Y-%m-%d %H:%M:%S'))

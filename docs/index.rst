@@ -3,6 +3,8 @@ Welcome to copydog's documentation!
 
 To be done!
 
+Requires at least Redmine 1.3
+
 .. toctree::
    :maxdepth: 2
 

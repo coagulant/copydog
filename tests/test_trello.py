@@ -16,4 +16,5 @@ class TestTrello(TestCase):
         print self.trello.boards()
 
     def test_statuses(self):
-        print self.trello.lists(board_id='4fe889e4c23b476f4a189ca5')
+        for list in self.trello.lists(board_id='4fe889e4c23b476f4a189ca5'):
+            print list._data
