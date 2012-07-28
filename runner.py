@@ -4,7 +4,8 @@ Copydog syncs Redmine and Trello.
 
 Usage:
   runner.py watch --config=<yaml> [options]
-  runner.py debug_storage
+  runner.py debug_storage [--config=<yaml>] [options]
+  runner.py flush_storage [--config=<yaml>] [options]
 
 Options:
   --config=<yaml>  Config file.
@@ -18,6 +19,7 @@ import logging
 from logging.config import dictConfig
 from docopt import docopt
 import copydog
+from copydog.storage import Storage
 from copydog.utils import storage_browser
 from copydog.utils.config import Config
 from copydog.watcher import Watch
@@ -42,6 +44,11 @@ def run_watch(config_path):
     watch.run()
 
 
+def flush_storage():
+    storage = Storage()
+    storage.flush()
+
+
 if __name__ == '__main__':
     arguments = docopt(__doc__, version='Copydog %s' % copydog.__version__)
     setup_logging(arguments)
@@ -51,6 +58,9 @@ if __name__ == '__main__':
 
     if arguments['debug_storage']:
         storage_browser.main()
+
+    if arguments['flush_storage']:
+        flush_storage()
 
 
 

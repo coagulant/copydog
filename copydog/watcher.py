@@ -51,7 +51,8 @@ class Watch(object):
         issues = self.clients['redmine'].issues(updated__after=last_read,
                                                 project_id=self.config.require('clients.redmine.project_id'))
         self.storage.mark_read('redmine', issues)
-        log.info('Read %s new issues from Redmine since %s', len(issues), last_read.strftime('%Y-%m-%d %H:%M:%S'))
+        timestamp = last_read.strftime('%Y-%m-%d %H:%M:%S') if last_read else 'Never'
+        log.info('Read %s new issues from Redmine since %s', len(issues), timestamp)
         return issues
 
     def write_trello(self, issues):
@@ -72,7 +73,8 @@ class Watch(object):
                                              board_id=self.config.require('clients.trello.board_id'),
                                              actions='all')
         self.storage.mark_read('trello', cards)
-        log.info('Read %s new cards from Trello since %s', len(cards), last_read.strftime('%Y-%m-%d %H:%M:%S'))
+        timestamp = last_read.strftime('%Y-%m-%d %H:%M:%S') if last_read else 'Never'
+        log.info('Read %s new cards from Trello since %s', len(cards), timestamp)
         return cards
 
     def write_redmine(self, cards):

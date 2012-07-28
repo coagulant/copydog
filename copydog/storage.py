@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 import datetime
+from logging import getLogger
 from dateutil.parser import parse
 import pytz
 import redis
 from api.redmine import Issue
 from api.trello import Card
+log = getLogger('copydog')
 
 
 class Storage(object):
@@ -49,6 +51,18 @@ class Storage(object):
         pipe.hset('{other_service}:items:{id}'.format(other_service=other_service, id=foreign_id),
                   'opposite_id', item.id)
         pipe.execute()
+
+    def flush(self):
+        redmine = self.redis.keys(pattern='redmine:*')
+        trello = self.redis.keys(pattern='trello:*')
+        keys_to_delete = redmine + trello
+        if keys_to_delete:
+            self.redis.delete(*keys_to_delete)
+            log.debug('Deleted keys: %s', keys_to_delete)
+            log.info('Deleted %d keys', len(keys_to_delete))
+        else:
+            log.info('Storage is empty')
+
 
 
 class Mapper(object):

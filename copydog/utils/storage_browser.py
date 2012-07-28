@@ -42,8 +42,3 @@ def main():
 
     print_table('redmine', issues)
     print_table('trello', cards)
-
-
-
-#if __name__ == "__main__":
-#    main()
