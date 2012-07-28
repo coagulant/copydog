@@ -31,7 +31,6 @@ class Redmine(ApiClient):
         return '{host}/{path}.json'.format(host=self.host.strip('/'), path=path)
 
     def post(self, path, data=None, **payload):
-        log.info(json.dumps(data))
         return self.method('post', path, json.dumps(data), headers={'Content-Type': 'application/json'}, **payload)
 
     def put(self, path, data=None, **payload):
@@ -50,14 +49,22 @@ class Redmine(ApiClient):
         :param sort: (optional) column to sort with
         :param inverse: (optional) inverse sorting
         :type inverse: boolean
+
+        Ref: http://www.redmine.org/projects/redmine/wiki/Rest_Issues
         """
         if inverse and kwargs.get('sort'):
             kwargs['sort'] += ':desc'
         if updated__after:
             kwargs['updated_on'] = '>={0}'.format(updated__after.date().isoformat())
 
-        issues = self.get('issues', **kwargs)['issues']
-        return [Issue(self, **data) for data in issues]
+        issues = [Issue(self, **data) for data in self.get('issues', **kwargs)['issues']]
+        log.debug('Got whole lot of %s cards from Redmine', len(issues))
+
+        # Redmine doesn't allow granular search by timestamp, so filtering manually
+        if updated__after:
+            issues = filter(lambda issue: issue.updated_on > updated__after, issues)
+
+        return issues
 
     def projects(self):
         """ Get a list of projects

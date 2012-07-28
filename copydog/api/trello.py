@@ -45,11 +45,12 @@ class Trello(ApiClient):
 
         :param board_id: The id of board to look for cards
         """
+        updated__after = kwargs.pop('updated__after')
+
         json = self.get('boards/{board_id}/cards/'.format(board_id=board_id), **kwargs)
         cards = [Card(self, **data) for data in json]
         log.debug('Got whole lot of %s cards from Trello board', len(cards))
 
-        updated__after = kwargs.get('updated__after')
         if updated__after:
             cards = filter(lambda card: updated__after and card.last_updated > updated__after, cards)
 
