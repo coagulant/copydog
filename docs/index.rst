@@ -21,7 +21,9 @@ Note, that some tests make actual API requests, so you need to setup some env va
 
 ``TRELLO_API_KEY`` - the `API key <https://trello.com/1/appKey/generate>`_ of your Trello app
 
-``TRELLO_TOKEN`` - your `consumer token <https://trello.com/docs/gettingstarted/index.html#getting-a-token-from-a-user>`_ to access Trello API ()
+``TRELLO_TOKEN`` - your `consumer token <https://trello.com/docs/gettingstarted/index.html#getting-a-token-from-a-user>`_ to access Trello API
+
+Obtain trello token for forever access r+w: https://trello.com/1/authorize?key=substitutewithyourapplicationkey&name=My+Application&expiration=never&response_type=token&scope=read,write
 
 You also need redis server running with default configuration.
 

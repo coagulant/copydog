@@ -31,6 +31,11 @@ class TestRedmine(TestCase):
         issues = self.r.issues(limit=1, tracker_name=u'Разработка')
         pprint.pprint(issues)
 
+    def test_statuses(self):
+        """ FIXME: no assert """
+        statuses = self.r.statuses()
+        pprint.pprint(statuses)
+
 
 
 class TestIssue(TestCase):
