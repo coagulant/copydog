@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from logging import getLogger
-from copydog.redmine import Redmine
-from copydog.storage import Storage, Mapper
-from copydog.trello import Trello
+from api.redmine import Redmine
+from storage import Storage, Mapper
+from api.trello import Trello
 log = getLogger('copydog')
 
 

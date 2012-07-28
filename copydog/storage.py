@@ -3,8 +3,8 @@ import datetime
 from dateutil.parser import parse
 import pytz
 import redis
-from copydog.redmine import Issue
-from copydog.trello import Card
+from api.redmine import Issue
+from api.trello import Card
 
 
 class Storage(object):

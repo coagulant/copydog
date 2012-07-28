@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from unittest.case import TestCase
 import datetime
-from mock import Mock, patch
-from copydog.redmine import Issue
+from mock import Mock
+from copydog.api.redmine import Issue
 from copydog.storage import Mapper
-from copydog.trello import Card
+from copydog.api.trello import Card
 from copydog.utils.config import Config
 config = Config.from_yaml('tests/copydog.yml')
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from logging import getLogger
 from dateutil.parser import parse
-from .api import ApiObject, ApiException, ApiClient
+from .common import ApiObject, ApiException, ApiClient
 log = getLogger('copydog.api')
 
 

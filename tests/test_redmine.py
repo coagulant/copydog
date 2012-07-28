@@ -4,7 +4,7 @@ from unittest.case import TestCase
 import datetime
 from dateutil.tz import tzoffset
 import os
-from copydog.redmine import Redmine, Issue
+from copydog.api.redmine import Redmine, Issue
 
 
 class TestRedmine(TestCase):

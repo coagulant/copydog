@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-import pprint
 from unittest.case import TestCase
 import os
-from copydog.trello import Trello
+from copydog.api.trello import Trello
 
 
 class TestTrello(TestCase):

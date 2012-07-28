@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from copydog.trello import Card
+from copydog.api.trello import Card
 
 
 class RedmineTrello(object):

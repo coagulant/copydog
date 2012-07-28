@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
-import sys
-sys.path.append('.')
-
 from texttable import Texttable
-from copydog.storage import Storage
+from ..storage import Storage
 
 
 def print_table(prefix, items):
@@ -48,5 +45,5 @@ def main():
 
 
 
-if __name__ == "__main__":
-    main()
+#if __name__ == "__main__":
+#    main()
