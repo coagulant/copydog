@@ -40,6 +40,12 @@ class Trello(ApiClient):
         json = self.get('boards/{board_id}/lists'.format(board_id=board_id))
         return [List(self, **data) for data in json]
 
+    def members(self, board_id):
+        """ Get list of lists :)
+        """
+        json = self.get('boards/{board_id}/members'.format(board_id=board_id))
+        return [Member(self, **data) for data in json]
+
     def cards(self, board_id, **kwargs):
         """ Get a list of cards
 
@@ -59,16 +65,17 @@ class Trello(ApiClient):
 
 class Board(ApiObject):
     """ Trello board """
-
-    def __init__(self, client, **data):
-        super(Board, self).__init__(client, **data)
+    pass
 
 
 class List(ApiObject):
     """ Trello list """
+    pass
 
-    def __init__(self, client, **data):
-        super(List, self).__init__(client, **data)
+
+class Member(ApiObject):
+    """ Trello board """
+    pass
 
 
 class Card(ApiObject):

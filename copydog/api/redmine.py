@@ -86,6 +86,14 @@ class Redmine(ApiClient):
         statuses = self.get('issue_statuses')['issue_statuses']
         return [Status(self, **data) for data in statuses]
 
+    def users(self):
+        """ Get a list of all users
+
+        Ref: http://www.redmine.org/projects/redmine/wiki/Rest_Users
+        """
+        users = self.get('users')['users']
+        return [User(self, **data) for data in users]
+
 
 class Project(ApiObject):
     """ Redmine project"""
@@ -97,6 +105,10 @@ class Tracker(ApiObject):
 
 class Status(ApiObject):
     """ Redmine status"""
+
+
+class User(ApiObject):
+    """ Redmine user"""
 
 
 class Issue(ApiObject):
@@ -127,7 +139,7 @@ class Issue(ApiObject):
         else:
             result = self.client.post(path='issues', data={'issue': self._data})
 
-        self._data = result
+        self._data = result['issue']
         return result
 
 

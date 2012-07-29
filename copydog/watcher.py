@@ -22,6 +22,9 @@ class Watch(object):
         self.mapper = Mapper(storage=self.storage, clients=self.clients, config=self.config)
 
     def save_list_status_mapping(self):
+        """ TODO: Move mapping logic into Mapper class
+            TODO: Optimize lookup
+        """
         statuses = self.clients['redmine'].statuses()
         lists = self.clients['trello'].lists(self.config.require('clients.trello.board_id'))
         for status in statuses:
@@ -33,8 +36,23 @@ class Watch(object):
             else:
                 log.warning('Status %s not mapped to Trello', status.name)
 
+    def save_user_member_mapping(self):
+        """ TODO: Move mapping logic into Mapper class
+        """
+        users = self.clients['redmine'].users()
+        members = self.clients['trello'].members(self.config.require('clients.trello.board_id'))
+        for user in users:
+            for member in members:
+                if user.login == member.username or u'%s %s' % (user.firstname, user.lastname) == member.fullName:
+                    self.storage.set_user_or_member_id(redmine_id=user.id, trello_id=member.id)
+                    log.debug('Mapped User %s to Trello', user.login)
+                    break
+            else:
+                log.warning('User %s not mapped to Trello', user.login)
+
     def run(self):
         self.save_list_status_mapping()
+        self.save_user_member_mapping()
         if self.config.get('clients.trello.write'):
             issues = self.read_redmine()
             if issues:

@@ -89,5 +89,5 @@ class ApiClient(object):
         if response.json:
             return response.json
         else:
-            raise ApiException
+            raise ApiException('JSON expected, got %s' % response.content)
 

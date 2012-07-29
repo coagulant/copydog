@@ -28,6 +28,17 @@ class Storage(object):
         pipe.hset('trello:list_status_mapping', trello_id, redmine_id)
         pipe.execute()
 
+    def get_user_or_member_id(self, service_name, id):
+        return self.redis.hget('{service_name}:user_member_mapping'.format(service_name=service_name), id)
+
+    def set_user_or_member_id(self, redmine_id, trello_id):
+        """ TODO: extract method, set_list_or_status_id
+        """
+        pipe = self.redis.pipeline()
+        pipe.hset('redmine:user_member_mapping', redmine_id, trello_id)
+        pipe.hset('trello:user_member_mapping', trello_id, redmine_id)
+        pipe.execute()
+
     def get_last_time_read(self, service_name):
         value = self.redis.get('{service_name}:last_read_time'.format(service_name=service_name))
         if value:
@@ -76,11 +87,15 @@ class Mapper(object):
         assert isinstance(issue, Issue)
         service_from = 'redmine'
         service_to = 'trello'
+        if hasattr(issue, 'assigned_to'):
+            idMembers = [self.storage.get_user_or_member_id(service_from, issue.assigned_to['id'])]
+        else:
+            idMembers = [None]
         card = Card(
             id = self.storage.get_opposite_item_id(service_from, issue.id),
-            idMembers = [None],
+            idMembers = idMembers,
             name = issue.subject,
-            desc = issue.description,
+            desc = issue.get('description'),
             idList = self.storage.get_list_or_status_id(service_from, issue.status['id']),
             idBoard = self.config.require('clients.trello.board_id'),
             due = issue.get('due_date', 'null'),
@@ -92,9 +107,13 @@ class Mapper(object):
         assert isinstance(card, Card)
         service_from = 'trello'
         service_to = 'redmine'
+        if len(card.idMembers):
+            assigned_to_id = self.storage.get_user_or_member_id(service_from, card.idMembers[0])
+        else:
+            assigned_to_id = None
         issue = Issue(
             id = self.storage.get_opposite_item_id(service_from, card.id),
-            assigned_to = None,
+            assigned_to_id = assigned_to_id,
             subject = card.name,
             description = card.desc,
             status_id = self.storage.get_list_or_status_id(service_from, card.idList),
