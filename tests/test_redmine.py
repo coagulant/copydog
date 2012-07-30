@@ -1,74 +1,47 @@
 # -*- coding: utf-8 -*-
-import json
-import logging
-import pprint
 from unittest.case import TestCase
 import datetime
 from dateutil.tz import tzoffset
+from nose.plugins.attrib import attr
 import os
 from copydog.api.redmine import Redmine, Issue
 
 
+@attr('http', 'redmine')
 class TestRedmine(TestCase):
+    """ Make sure to provide ``REDMINE_HOST`` and ``REDMINE_API_KEY``
+        environment variables to execute this test.
+    """
 
     def setUp(self):
-        self.r = Redmine(host=os.environ.get('REDMINE_HOST'), api_key=os.environ.get('REDMINE_API_KEY'))
+        self.r = Redmine(host=os.environ.get('REDMINE_HOST'),
+                         api_key=os.environ.get('REDMINE_API_KEY'))
 
-    def test_api(self):
-        """ FIXME: no assert """
-        r = Redmine(host='http://redmine.org', api_key=123)
-        print r.issues()
+    def test_connect_public_api(self):
+        r = Redmine(host='http://redmine.org')
+        issues = r.issues()
+        self.assertTrue(type(issues) is list)
+        self.assertTrue(len(issues) > 0)
 
-    def test_protected_api(self):
-        """ FIXME: no assert """
-        print self.r.issues()
+    def test_connect_protected_api(self):
+        issues = self.r.issues()
+        self.assertTrue(type(issues) is list)
 
     def test_projects(self):
-        """ FIXME: no assert """
         projects = self.r.projects()
-        pprint.pprint(self.r.projects())
+        self.assertTrue(type(projects) is list)
 
     def test_issues(self):
-        """ FIXME: no assert """
-        issues = self.r.issues(limit=1, tracker_name=u'Разработка')
-        pprint.pprint(issues)
+        issues = self.r.issues(limit=1)
+        self.assertTrue(type(issues) is list)
+        self.assertTrue(len(issues) <= 1)
 
     def test_statuses(self):
-        """ FIXME: no assert """
         statuses = self.r.statuses()
-        pprint.pprint(statuses)
-
-    def test_post(self):
-        logging.basicConfig(level=logging.DEBUG)
-#        issue = Issue(client=self.r, project_id='playground', subject=u"rrrr")
-#        result = issue.save()
-#
-#        key = os.environ.get('REDMINE_API_KEY')
-#        data = {"issue": {"due_date": None, "description": "Maybe card description will come later!\n",
-#                          "status_id": "2", "assigned_to_id": "6", "project_id": "playground",
-#                          "id": "6982", "subject": "Resolved card"}}
-#        result = requests.put('https://fcdev.ru/issues/6982.json',
-#                               data=json.dumps(data),
-#                               headers={'Content-Type': 'application/json', 'X-Redmine-API-Key': key}
-#        )
-#        pprint.pprint(result.status_code)
-#        pprint.pprint(result.content)
-#        pprint.pprint(result.text)
-#        pprint.pprint(result.json)
+        self.assertTrue(type(statuses) is list)
 
 
-
-#        result = requests.post('https://fcdev.ru/issues.json?key=%s' % key,
-#                               data=json.dumps({'issue': issue._data}),
-#                               #headers={'Content-Type': 'application/json'}
-#        )
-#        pprint.pprint(result.status_code)
-#        pprint.pprint(result.content)
-#        pprint.pprint(result.text)
-
-
-
-
+@attr('redmine')
 class TestIssue(TestCase):
 
     def test_init(self):
@@ -91,8 +64,3 @@ class TestIssue(TestCase):
                 u'done_ratio': 0,
                 u'priority': {u'name': u'\u041d\u043e\u0440\u043c\u0430\u043b\u044c\u043d\u044b\u0439', u'id': 4}}
         self.assertEqual(Issue(**json).created_on, datetime.datetime(2012, 7, 22, 16,17,37, tzinfo=tzoffset(None, 14400)))
-
-#    def test_save(self):
-#        client = Redmine(host=os.environ.get('REDMINE_HOST'), api_key=os.environ.get('REDMINE_API_KEY'))
-#        issue = Issue(client=client, subject='Test subject', description='Test description', project_id='playground')
-#        issue.save()

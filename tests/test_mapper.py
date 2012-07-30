@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from unittest.case import TestCase
 import datetime
-from mock import Mock
+from mock import Mock, patch
 from copydog.api.redmine import Issue
 from copydog.convertor import Mapper
 from copydog.api.trello import Card
@@ -9,7 +9,7 @@ from copydog.utils.config import Config
 config = Config.from_yaml('tests/copydog.yml')
 
 
-class MapperIssueToCardTest(TestCase):
+class IssueToCardTest(TestCase):
 
     def setUp(self):
         self.storage_mock = Mock()
@@ -24,7 +24,8 @@ class MapperIssueToCardTest(TestCase):
             'subject': 'Save humanity',
             'description': 'Humanity in danger',
             'due_date': datetime.date(2012, 12, 20),
-            'status': {'name': "Assigned", 'id': 2}
+            'status': {'name': "Assigned", 'id': 2},
+            'assigned_to': {'id': '42'}
         })
 
     @property
@@ -36,7 +37,8 @@ class MapperIssueToCardTest(TestCase):
         self.assertEqual(self.trello_card.id, '777')
 
     def test_card_idMembers(self):
-        self.assertEqual(self.trello_card.idMembers, [None])
+        self.storage_mock.get_user_or_member_id.return_value = 'abcdef'
+        self.assertEqual(self.trello_card.idMembers, ['abcdef'])
 
     def test_card_name(self):
         self.assertEqual(self.trello_card.name, 'Save humanity')
@@ -45,12 +47,13 @@ class MapperIssueToCardTest(TestCase):
         self.assertEqual(self.trello_card.desc, 'Humanity in danger')
 
     def test_id_list(self):
-        self.storage_mock.get_item_list_id.return_value = '123'
+        self.storage_mock.get_list_or_status_id.return_value = '123'
         self.assertEqual(self.trello_card.idList, '123')
 
-#    @patch('config.board_id', '1fe889e4c23b476f4a189ca5')
-#    def test_idBoard(self):
-#        self.assertEqual(self.trello_card.idBoard, '1fe889e4c23b476f4a189ca5')
+    @patch.object(config, 'get')
+    def test_idBoard(self, config_get_mock):
+        config_get_mock.return_value = '1fe889e4c23b476f4a189ca5'
+        self.assertEqual(self.trello_card.idBoard, '1fe889e4c23b476f4a189ca5')
 
     def test_due(self):
         self.assertEqual(self.trello_card.due, datetime.date(2012, 12, 20))
@@ -59,7 +62,7 @@ class MapperIssueToCardTest(TestCase):
         self.assertEqual(self.trello_card.client(), 'trello')
 
 
-class MapperCardToIssueTest(TestCase):
+class CardToIssueTest(TestCase):
     def setUp(self):
         self.storage_mock = Mock()
         self.mapper = Mapper(config=config,
@@ -74,32 +77,35 @@ class MapperCardToIssueTest(TestCase):
             'desc': 'Humanity in our enemy',
             'due': datetime.date(1990, 1, 1),
             'idList': '4fe889e4c23b476f4a189ca6',
+            'idMembers': [None],
         })
 
     @property
     def redmine_issue(self):
         return self.mapper.card_to_redmine(self.issue)
 
-    def test_new_card_id(self):
+    def test_new_issue_id(self):
         self.storage_mock.get_opposite_item_id.return_value = '555'
         self.assertEqual(self.redmine_issue.id, '555')
 
-    def test_card_idMembers(self):
-        self.assertEqual(self.redmine_issue.assigned_to, None)
+    def test_issue_assigned_to(self):
+        self.storage_mock.get_user_or_member_id.return_value = 42
+        self.assertEqual(self.redmine_issue.assigned_to_id, 42)
 
-    def test_card_subject(self):
+    def test_issue_subject(self):
         self.assertEqual(self.redmine_issue.subject, 'Destroy humanity')
 
-    def test_card_description(self):
+    def test_issue_description(self):
         self.assertEqual(self.redmine_issue.description, 'Humanity in our enemy')
 
     def test_status(self):
-        self.storage_mock.get_item_list_id.return_value = '123'
+        self.storage_mock.get_list_or_status_id.return_value = '123'
         self.assertEqual(self.redmine_issue.status_id, '123')
 
-#    @patch('tests.config.CopyDogConfig.default_project_id', 7)
-#    def test_project_id(self):
-#        self.assertEqual(self.redmine_issue.project_id, 7)
+    @patch.object(config, 'get')
+    def test_project_id(self, config_get_mock):
+        config_get_mock.return_value = 7
+        self.assertEqual(self.redmine_issue.project_id, 7)
 
     def test_due_date(self):
         self.assertEqual(self.redmine_issue.due_date, datetime.date(1990, 1, 1))
