@@ -1,7 +1,7 @@
 Copydog
 -------
 
-Copydog seamlessly copies issues from Redmine_ to Trello_ and vice versa.
+Copydog copies issues between Redmine_ and Trello_ on the fly.
 It's a small daemon, monitoring changes in both systems and keeping
 them in sync as much as possible.
 
@@ -12,7 +12,7 @@ them in sync as much as possible.
 Installation
 ============
 
-Git clone the repo https://github.com/futurecolors/copydog.git
+Git clone the repo https://github.com/coagulant/copydog.git
 You also need a redis instance to store sync intermediate results.
 
 Configuration
@@ -64,8 +64,37 @@ Here is how config file might look like::
         db: 0
         password:None
 
-Storage config might be completely ommited if you're using default Redis connection.
+For now copydog supports syncing one redmine project with one trello board at a time,
+so you need to specify ``project_id`` (string slug or integer) and ``board_id`` (string id).
+Storage config might be completely omitted if you're using default Redis connection.
+Write flag allows copydog to modify contents on a client, set it to 0
+to disable sync writes to either redmine or trello.
 
+Running copydog
+===============
+To launch the app::
+
+    python runner.py --config=<path_to_your_yaml_config>
+
+Copydog will start monitoring new changes in both services and mirror them accordingly.
+Redmine statuses are associated with Trello lists and are mapped by exact name match,
+so make sure you have same set of Statuses and Lists in your project and your board.
+Assigned members are linked by username or full name as a fallback.
+
+Fields
+^^^^^^
+Copydog tries to be smart when transferring cards to issues and vice versa:
+
+============   ==========  =========
+Redmine        Trello      Comment
+============   ==========  =========
+subject        name
+description    desc
+assigned_to    idMembers   Redmine doesn't support multiple assignees, the first one is taken.
+status_id      isList      Copydog maps each status to list by name
+project_id     board_id    For now, copydog allows to sync one board with one project only
+due_date       due
+============   ==========  =========
 
 Launching tests
 ===============
