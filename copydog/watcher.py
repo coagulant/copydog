@@ -102,6 +102,7 @@ class Watch(object):
             log.debug('Saving card %s to Redmine', card.id)
             log.debug('%s', issue._data)
             issue.save()
+            issue.fetch()
             log.debug('%s', issue._data)
             self.storage.mark_written('redmine', issue, foreign_id=card.id)
         log.info('Converted %s new cards to Redmine', len(cards))

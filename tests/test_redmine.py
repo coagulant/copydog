@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import json
+import logging
 import pprint
 from unittest.case import TestCase
 import datetime
@@ -35,6 +37,35 @@ class TestRedmine(TestCase):
         """ FIXME: no assert """
         statuses = self.r.statuses()
         pprint.pprint(statuses)
+
+    def test_post(self):
+        logging.basicConfig(level=logging.DEBUG)
+#        issue = Issue(client=self.r, project_id='playground', subject=u"rrrr")
+#        result = issue.save()
+#
+#        key = os.environ.get('REDMINE_API_KEY')
+#        data = {"issue": {"due_date": None, "description": "Maybe card description will come later!\n",
+#                          "status_id": "2", "assigned_to_id": "6", "project_id": "playground",
+#                          "id": "6982", "subject": "Resolved card"}}
+#        result = requests.put('https://fcdev.ru/issues/6982.json',
+#                               data=json.dumps(data),
+#                               headers={'Content-Type': 'application/json', 'X-Redmine-API-Key': key}
+#        )
+#        pprint.pprint(result.status_code)
+#        pprint.pprint(result.content)
+#        pprint.pprint(result.text)
+#        pprint.pprint(result.json)
+
+
+
+#        result = requests.post('https://fcdev.ru/issues.json?key=%s' % key,
+#                               data=json.dumps({'issue': issue._data}),
+#                               #headers={'Content-Type': 'application/json'}
+#        )
+#        pprint.pprint(result.status_code)
+#        pprint.pprint(result.content)
+#        pprint.pprint(result.text)
+
 
 
 

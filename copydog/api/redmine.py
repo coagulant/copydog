@@ -34,7 +34,9 @@ class Redmine(ApiClient):
         return self.method('post', path, json.dumps(data), headers={'Content-Type': 'application/json'}, **payload)
 
     def put(self, path, data=None, **payload):
-        return self.method('put', path, json.dumps(data), headers={'Content-Type': 'application/json'}, **payload)
+        """ Redmine returns empty 200 OK"""
+        return self.method('put', path, json.dumps(data), expect_json=False,
+                           headers={'Content-Type': 'application/json'}, **payload)
 
     def issues(self, inverse=None, updated__after=None, **kwargs):
         """ Get a list of issues
@@ -138,10 +140,17 @@ class Issue(ApiObject):
             result = self.client.put(path='issues/{issue_id}'.format(issue_id=self.id), data={'issue': self._data})
         else:
             result = self.client.post(path='issues', data={'issue': self._data})
-
-        self._data = result['issue']
+            self._data = result['issue']
         return result
 
+    def fetch(self):
+        """ Fetch fresh info about the issue
+
+        We need it, because save method doesn't return card timestamp on PUT.
+        """
+        result = self.client.get('issues/{issue_id}'.format(issue_id=self.id))
+        self._data = result['issue']
+        return result
 
     @property
     def last_updated(self):

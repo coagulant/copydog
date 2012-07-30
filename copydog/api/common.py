@@ -74,7 +74,7 @@ class ApiClient(object):
     def put(self, path, data=None, **payload):
         return self.method('put', path, data, **payload)
 
-    def method(self, method, path, data=None, headers=None, **payload):
+    def method(self, method, path, data=None, headers=None, expect_json=True, **payload):
         payload.update(self.default_payload())
         response = requests.request(method=method, url=self.build_api_url(path),
                                     headers=headers, data=data, params=payload)
@@ -89,5 +89,7 @@ class ApiClient(object):
         if response.json:
             return response.json
         else:
-            raise ApiException('JSON expected, got %s' % response.content)
+            if expect_json:
+                raise ApiException('JSON expected, got %s' % response.content)
+            return True
 
