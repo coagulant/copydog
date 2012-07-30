@@ -3,7 +3,7 @@ from unittest.case import TestCase
 import datetime
 from mock import Mock
 from copydog.api.redmine import Issue
-from copydog.storage import Mapper
+from copydog.convertor import Mapper
 from copydog.api.trello import Card
 from copydog.utils.config import Config
 config = Config.from_yaml('tests/copydog.yml')
