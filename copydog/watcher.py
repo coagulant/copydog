@@ -1,10 +1,18 @@
 # -*- coding: utf-8 -*-
 from logging import getLogger
+import time
+import sched
 from api.redmine import Redmine
 from copydog.convertor import Mapper
 from storage import Storage
 from api.trello import Trello
 log = getLogger('copydog')
+
+
+def periodic(scheduler, interval, action, actionargs=()):
+    scheduler.enter(interval, 1, periodic,
+        (scheduler, interval, action, actionargs))
+    action(*actionargs)
 
 
 class Watch(object):
@@ -21,6 +29,8 @@ class Watch(object):
                              token=clients_config.require('trello.token'))
         }
         self.mapper = Mapper(storage=self.storage, clients=self.clients, config=self.config)
+        self.save_list_status_mapping()
+        self.save_user_member_mapping()
 
     def save_list_status_mapping(self):
         """ TODO: Move mapping logic into Mapper class
@@ -35,7 +45,7 @@ class Watch(object):
                     log.debug('Mapped Status %s to Trello', status.name)
                     break
             else:
-                log.warning('Status %s not mapped to Trello', status.name)
+                log.debug('Status %s not mapped to Trello', status.name)
 
     def save_user_member_mapping(self):
         """ TODO: Move mapping logic into Mapper class
@@ -49,11 +59,9 @@ class Watch(object):
                     log.debug('Mapped User %s to Trello', user.login)
                     break
             else:
-                log.warning('User %s not mapped to Trello', user.login)
+                log.debug('User %s not mapped to Trello', user.login)
 
-    def run(self):
-        self.save_list_status_mapping()
-        self.save_user_member_mapping()
+    def sync(self):
         if self.config.get('clients.trello.write'):
             issues = self.read_redmine()
             if issues:
@@ -63,6 +71,11 @@ class Watch(object):
             cards = self.read_trello()
             if cards:
                 self.write_redmine(cards)
+
+    def run(self):
+        scheduler = sched.scheduler(time.time, time.sleep)
+        periodic(scheduler, 60, self.sync)
+        scheduler.run()
 
     def read_redmine(self):
         """ TODO: Check last_read against storage"""

@@ -3,9 +3,10 @@
 Copydog syncs Redmine and Trello.
 
 Usage:
-  runner.py watch --config=<yaml> [options]
-  runner.py debug_storage [--config=<yaml>] [options]
-  runner.py flush_storage [--config=<yaml>] [options]
+  runner.py --config=<yaml>
+  runner.py (start|restart) --config=<yaml> [options]
+  runner.py stop [options]
+  runner.py debug_storage|flush_storage [options]
 
 Options:
   --config=<yaml>  Config file.
@@ -17,6 +18,7 @@ Options:
 
 import logging
 from logging.config import dictConfig
+from daemon.runner import DaemonRunner
 from docopt import docopt
 import copydog
 from copydog.storage import Storage
@@ -36,12 +38,24 @@ def setup_logging(arguments):
     logging.getLogger('copydog').setLevel(level)
 
 
-def run_watch(config_path):
+def execute(config_path, daemonize=False):
     config = Config.from_yaml(config_path)
     if not config.get('clients.trello.write') and not config.get('clients.redmine.write'):
         exit('Allow at least one client write')
     watch = Watch(config)
-    watch.run()
+
+    if not daemonize:
+        watch.run()
+    else:
+        class DeamonApp(object):
+            stdin_path='/tmp/copydog.in.log'
+            stdout_path='/tmp/copydog.out.log'
+            stderr_path='/tmp/copydog.err.log'
+            pidfile_path='/tmp/copydog.pid'
+            pidfile_timeout=100
+            run=watch.run
+
+        DaemonRunner(DeamonApp()).do_action()
 
 
 def flush_storage():
@@ -53,14 +67,16 @@ if __name__ == '__main__':
     arguments = docopt(__doc__, version='Copydog %s' % copydog.__version__)
     setup_logging(arguments)
 
-    if arguments['watch']:
-        run_watch(arguments['--config'])
-
     if arguments['debug_storage']:
         storage_browser.main()
 
     if arguments['flush_storage']:
         flush_storage()
+
+    if arguments.get('start') or arguments.get('stop') or arguments.get('restart'):
+        execute(arguments['--config'], daemonize=True)
+    else:
+        execute(arguments['--config'])
 
 
 
