@@ -42,14 +42,15 @@ class Redmine(ApiClient):
         """ Get a list of issues
 
         :param page: (optional) page number
-        :param offset: (optional) skip this number of issues in response
-        :param limit: (optional) number of issues per page
-        :param project_id: (optional) get issues from the project with the given id,
+        :param offset (optional): skip this number of issues in response
+        :param limit (optional): number of issues per page
+        :param project_id (optional): get issues from the project with the given id,
                            where id is either project id or project identifier
-        :param tracker_id: (optional) get issues from the tracker with the given id
-        :param updated__after: (optional) only issues, update after given timestamp
-        :param sort: (optional) column to sort with
-        :param inverse: (optional) inverse sorting
+        :param fixed_version_id (optional): target version of the issues as a filter
+        :param tracker_id (optional): get issues from the tracker with the given id
+        :param updated__after (optional): only issues, update after given timestamp
+        :param sort (optional): column to sort with
+        :param inverse (optional): inverse sorting
         :type inverse: boolean
 
         Ref: http://www.redmine.org/projects/redmine/wiki/Rest_Issues

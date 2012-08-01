@@ -48,7 +48,9 @@ class Watch(object):
         last_read = self.storage.get_last_time_read('redmine')
         issues = self.clients['redmine'].issues(updated__after=last_read,
                                                 tracker_id=self.config.get('clients.redmine.tracker_id'),
-                                                project_id=self.config.require('clients.redmine.project_id'))
+                                                project_id=self.config.require('clients.redmine.project_id'),
+                                                fixed_version_id=self.config.get('clients.redmine.fixed_version_id')
+        )
         self.storage.mark_read('redmine', issues)
         timestamp = last_read.strftime('%Y-%m-%d %H:%M:%S') if last_read else 'Never'
         log.info('Read %s new issues from Redmine since %s', len(issues), timestamp)

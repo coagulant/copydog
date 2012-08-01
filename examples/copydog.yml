@@ -2,6 +2,7 @@ clients:
     redmine:
         project_id: playground
         tracker_id: 8
+        fixed_version_id: 163
         write: 0
     trello:
         board_id: 4fe889e4c23b476f4a189ca5
