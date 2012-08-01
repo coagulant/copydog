@@ -3,9 +3,8 @@
 Copydog syncs Redmine and Trello.
 
 Usage:
-  runner.py --config=<yaml>
-  runner.py (start|restart) --config=<yaml> [options]
-  runner.py stop [options]
+  runner.py --config=<yaml> [options]
+  runner.py (start|stop|restart) --config=<yaml> [options]
   runner.py debug_storage|flush_storage [options]
 
 Options:
@@ -54,7 +53,6 @@ def execute(config_path, daemonize=False):
             pidfile_path='/tmp/copydog.pid'
             pidfile_timeout=100
             run=watch.run
-
         DaemonRunner(DeamonApp()).do_action()
 
 

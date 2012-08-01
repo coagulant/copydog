@@ -4,15 +4,10 @@ import time
 import sched
 from api.redmine import Redmine
 from copydog.convertor import Mapper
+from copydog.utils.task import periodic
 from storage import Storage
 from api.trello import Trello
 log = getLogger('copydog')
-
-
-def periodic(scheduler, interval, action, actionargs=()):
-    scheduler.enter(interval, 1, periodic,
-        (scheduler, interval, action, actionargs))
-    action(*actionargs)
 
 
 class Watch(object):
@@ -29,37 +24,8 @@ class Watch(object):
                              token=clients_config.require('trello.token'))
         }
         self.mapper = Mapper(storage=self.storage, clients=self.clients, config=self.config)
-        self.save_list_status_mapping()
-        self.save_user_member_mapping()
-
-    def save_list_status_mapping(self):
-        """ TODO: Move mapping logic into Mapper class
-            TODO: Optimize lookup
-        """
-        statuses = self.clients['redmine'].statuses()
-        lists = self.clients['trello'].lists(self.config.require('clients.trello.board_id'))
-        for status in statuses:
-            for list in lists:
-                if status.name == list.name:
-                    self.storage.set_list_or_status_id(redmine_id=status.id, trello_id=list.id)
-                    log.debug('Mapped Status %s to Trello', status.name)
-                    break
-            else:
-                log.debug('Status %s not mapped to Trello', status.name)
-
-    def save_user_member_mapping(self):
-        """ TODO: Move mapping logic into Mapper class
-        """
-        users = self.clients['redmine'].users()
-        members = self.clients['trello'].members(self.config.require('clients.trello.board_id'))
-        for user in users:
-            for member in members:
-                if user.login == member.username or u'%s %s' % (user.firstname, user.lastname) == member.fullName:
-                    self.storage.set_user_or_member_id(redmine_id=user.id, trello_id=member.id)
-                    log.debug('Mapped User %s to Trello', user.login)
-                    break
-            else:
-                log.debug('User %s not mapped to Trello', user.login)
+        self.mapper.save_list_status_mapping()
+        self.mapper.save_user_member_mapping()
 
     def sync(self):
         if self.config.get('clients.trello.write'):
