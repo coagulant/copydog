@@ -36,20 +36,20 @@ class Mapper(object):
         assert isinstance(card, Card)
         service_from = 'trello'
         service_to = 'redmine'
-        if len(card.idMembers):
-            assigned_to_id = self.storage.get_user_or_member_id(service_from, card.idMembers[0])
-        else:
-            assigned_to_id = None
         issue = Issue(
             id = self.storage.get_opposite_item_id(service_from, card.id),
-            assigned_to_id = assigned_to_id,
+            assigned_to_id = None,
             subject = card.name,
             description = card.desc,
             status_id = self.storage.get_list_or_status_id(service_from, card.idList),
             project_id = self.config.require('clients.redmine.project_id'),
+            tracker_id = self.config.get('clients.redmine.tracker_id'),
             due_date = card.get('due'),
             client = self.clients[service_to]
         )
+        if len(card.idMembers):
+            issue.assigned_to_id = self.storage.get_user_or_member_id(service_from, card.idMembers[0])
+
         return issue
 
     def save_list_status_mapping(self):

@@ -96,6 +96,16 @@ project_id     board_id    For now, copydog allows to sync one board with one pr
 due_date       due
 ============   ==========  =========
 
+Development
+==========
+
+Copydog is developed and maintained by `Baryshev Ilya`_
+Feel free to submit `pull requests`_ or comments at development `Trello board`_.
+
+.. _Baryshev Ilya: https://github.com/coagulant
+.. _pull requests: https://github.com/coagulant/copydog
+.. _Trello board: https://trello.com/board/copydog/501954bc8c03157b50d6f7ef
+
 Launching tests
 ===============
 

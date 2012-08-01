@@ -1,7 +1,8 @@
 clients:
     redmine:
         project_id: playground
-        write: 1
+        tracker_id: 8
+        write: 0
     trello:
         board_id: 4fe889e4c23b476f4a189ca5
         write: 1
