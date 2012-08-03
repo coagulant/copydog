@@ -92,6 +92,9 @@ class Card(ApiObject):
         assert self.name is not None
         assert self.idList is not None
 
+    def get_url(self):
+        return self.url
+
     def save(self):
         """ Save new card
         """

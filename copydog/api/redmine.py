@@ -18,9 +18,8 @@ class Redmine(ApiClient):
         :host: Full URL of redmine installation.
         :api_key: API key for Redmine. Can be obtained at http://<your_domain>/my/account
         """
-        self.host = host
+        self.host = host.rstrip('/')
         self.api_key = api_key
-
 
     def default_payload(self):
         return {
@@ -122,6 +121,9 @@ class Issue(ApiObject):
         :param description: description
     """
     date_fields = ('updated_on', 'created_on')
+
+    def get_url(self):
+        return '{host}/issues/{issue_id}/'.format(host=self.client.host, issue_id=self.id)
 
     def save(self):
         """ Save new issue

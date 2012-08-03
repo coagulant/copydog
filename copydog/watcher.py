@@ -63,6 +63,11 @@ class Watch(object):
             log.debug('Saving issue %s to Trello', issue.id)
             log.debug('%s', card._data)
             card.save()
+
+            # Let's create a comment with redmine reference
+            self.clients['trello'].post(path='cards/{card_id}/actions/comments'.format(card_id=card.id),
+                data={'text': 'Redmine: {0}'.format(issue.get_url())})
+
             card.fetch()
             log.debug('%s', card._data)
             self.storage.mark_written('trello', card, foreign_id=issue.id)
@@ -85,6 +90,10 @@ class Watch(object):
             log.debug('Saving card %s to Redmine', card.id)
             log.debug('%s', issue._data)
             issue.save()
+
+            # Currently can't update issue journal to leave a comment
+            # http://www.redmine.org/issues/10171
+
             issue.fetch()
             log.debug('%s', issue._data)
             self.storage.mark_written('redmine', issue, foreign_id=card.id)
