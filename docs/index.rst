@@ -1,24 +1,26 @@
 Copydog
 -------
 
-Copydog copies issues between Redmine_ and Trello_ on the fly.
+Copydog converts issues between Redmine_ and Trello_ on the fly.
 It's a small daemon, monitoring changes in both systems and keeping
 them in sync as much as possible.
 
-.. toctree::
-    index
+Copydog is in active development, so please don't expect stable
+perfomance.
 
+.. toctree::
+    Copydog
 
 Installation
 ============
 
 Git clone the repo https://github.com/coagulant/copydog.git
-You also need a redis instance to store sync intermediate results.
+You also need a redis instance to store intermediate results of syncronization.
 
 Configuration
 =============
 
-For copydog to work you obviously need both Trello and Redmine accounts.
+For copydog to work you need both Trello and Redmine accounts.
 
 Trello
 ^^^^^^
@@ -32,7 +34,7 @@ After that you need to obtain you API key and user token.
 
 .. note::
 
-    Obtain Trello token for forever read and write access::
+    Obtain Trello token granting forever read and write access::
 
         https://trello.com/1/authorize?key=substitutewithyourapplicationkey&name=My+Application&expiration=never&response_type=token&scope=read,write
 
@@ -91,23 +93,25 @@ Redmine        Trello      Comment
 subject        name
 description    desc
 assigned_to    idMembers   Redmine doesn't support multiple assignees, the first one is taken.
-status_id      isList      Copydog maps each status to list by name
+status_id      idList      Copydog maps each status to list by name
 project_id     board_id    For now, copydog allows to sync one board with one project only
 due_date       due
 ============   ==========  =========
 
+Other data like priorities, comments, labels are not synced.
+
 Development
 ==========
 
-Copydog is developed and maintained by `Baryshev Ilya`_
-Feel free to submit `pull requests`_ or comments at development `Trello board`_.
+Copydog is developed and maintained by `Baryshev Ilya`_.
+Feel free to submit `issues`_ or comments at development `Trello board`_.
 
 .. _Baryshev Ilya: https://github.com/coagulant
-.. _pull requests: https://github.com/coagulant/copydog
+.. _issues: https://github.com/coagulant/copydog
 .. _Trello board: https://trello.com/board/copydog/501954bc8c03157b50d6f7ef
 
 Launching tests
-===============
+^^^^^^^^^^^^^^^
 
 To launch tests execute::
 
@@ -124,10 +128,17 @@ These tests will pass if you have following env variables set:
 * ``TRELLO_API_KEY`` - the API key  of your Trello app
 * ``TRELLO_TOKEN`` - your consumer token to access Trello API
 
+Changelog
+=========
+ver 0.1 (TBA)
+^^^^^^^^^^^^^
+* Initial release
+
 
 .. _Redmine: http://redmine.org/
 .. _Trello: http://trello.com/
 .. _generate: https://trello.com/1/appKey/generate
 .. _the docs: https://trello.com/docs/gettingstarted/index.html#getting-a-token-from-a-user
 .. _signup page: https://trello.com/signup
+
 
