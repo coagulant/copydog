@@ -99,7 +99,11 @@ class Card(ApiObject):
             result = self.client.put(path='cards/{card_id}'.format(card_id=self.id), data=self._data)
         else:
             result = self.client.post(path='cards', data=self._data)
-
+            # Trello doesn't allow to assign cards on creation
+            if self.get('idMembers'):
+                self.client.post(path='cards/{card_id}/members'.format(card_id=result['id']),
+                                 data={'value': self.idMembers[0]})
+                result['idMembers'] = self.idMembers
         self._data = result
         return result
 
