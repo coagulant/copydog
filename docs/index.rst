@@ -5,8 +5,8 @@ Copydog converts issues between Redmine_ and Trello_ on the fly.
 It's a small daemon, monitoring changes in both systems and keeping
 them in sync as much as possible.
 
-Copydog is in active development, so please don't expect stable
-perfomance.
+.. warning::
+    Copydog is in active development, it's not ready for production yet.
 
 .. toctree::
     Copydog
@@ -79,13 +79,28 @@ To launch the app::
     python runner.py --config=<path_to_your_yaml_config>
 
 Copydog will start monitoring new changes in both services and mirror them accordingly.
+If you wish to sync all existing issues/card, use ``--fullsync`` option::
+
+    python runner.py --fullsync --config=<path_to_your_yaml_config>
+
+Deamon
+^^^^^^
+If you're not developing copydog it's useful to run it as daemon process.
+To daemonize copydog, run it with a ``start`` argument::
+
+    python runner.py start --config=<path_to_your_yaml_config>
+
+Copydog will run in background unless you stop it::
+
+    python runner.py stop --config=<path_to_your_yaml_config>
+
+
+Fields mapping
+^^^^^^^^^^^^^^
+Copydog tries to be smart when transferring cards to issues and vice versa.
 Redmine statuses are associated with Trello lists and are mapped by exact name match,
 so make sure you have same set of Statuses and Lists in your project and your board.
 Assigned members are linked by username or full name as a fallback.
-
-Fields
-^^^^^^
-Copydog tries to be smart when transferring cards to issues and vice versa:
 
 ============   ==========  =========
 Redmine        Trello      Comment
@@ -101,7 +116,7 @@ due_date       due
 Other data like priorities, comments, labels are not synced.
 
 Development
-==========
+===========
 
 Copydog is developed and maintained by `Baryshev Ilya`_.
 Feel free to submit `issues`_ or comments at development `Trello board`_.
