@@ -4,8 +4,15 @@
   {% if theme_touch_icon %}
   <link rel="apple-touch-icon" href="{{ pathto('_static/' ~ theme_touch_icon, 1) }}" />
   {% endif %}
+  <link href='http://fonts.googleapis.com/css?family=Quando' rel='stylesheet' type='text/css'>
   <link media="only screen and (max-device-width: 480px)" href="{{
     pathto('_static/small_flask.css', 1) }}" type= "text/css" rel="stylesheet" />
+{% endblock %}
+{%- block sidebarsourcelink %}
+{% endblock %}
+{%- block sidebarrel %}
+{% endblock %}
+{%- block sidebarsearch %}
 {% endblock %}
 {%- block relbar2 %}{% endblock %}
 {% block header %}

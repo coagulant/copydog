@@ -7,14 +7,14 @@ them in sync as much as possible.
 
 .. warning::
     Copydog is in active development, it's not ready for production yet.
+    However, please, feel free to experiment/test and use the code.
 
-.. toctree::
-    Copydog
 
 Installation
 ============
 
 Git clone the repo https://github.com/coagulant/copydog.git
+
 You also need a Redis instance to store intermediate results of syncronization.
 
 Configuration
