@@ -34,5 +34,8 @@ class Config(object):
                 return default
             raise ImproperlyConfigured('Missing config %s' % path)
 
+    def set(self, path, value):
+        self._data[path] = value
+
     def require(self, path):
         return self.get(path, fallback=False)

@@ -23,9 +23,23 @@ class Watch(object):
             'trello': Trello(api_key=clients_config.require('trello.api_key'),
                              token=clients_config.require('trello.token'))
         }
+        self.setup_last_time_read()
+
         self.mapper = Mapper(storage=self.storage, clients=self.clients, config=self.config)
         self.mapper.save_list_status_mapping()
         self.mapper.save_user_member_mapping()
+
+
+    def setup_last_time_read(self):
+        """ Ignoring last time read, when using full_sync,
+            If launching for first time, make sire we're monitoring only recent changes.
+        """
+        if self.config.get('full_sync'):
+            self.storage.reset_last_time_read()
+        else:
+            if not self.storage.get_last_time_read('redmine'):
+                self.storage.mark_read('redmine', [])
+                self.storage.mark_read('trello', [])
 
     def sync(self):
         if self.config.get('clients.trello.write'):
@@ -44,20 +58,19 @@ class Watch(object):
         scheduler.run()
 
     def read_redmine(self):
-        """ TODO: Check last_read against storage"""
         last_read = self.storage.get_last_time_read('redmine')
         issues = self.clients['redmine'].issues(updated__after=last_read,
                                                 tracker_id=self.config.get('clients.redmine.tracker_id'),
                                                 project_id=self.config.require('clients.redmine.project_id'),
                                                 fixed_version_id=self.config.get('clients.redmine.fixed_version_id')
         )
+        # maybe check if issue is already synced
         self.storage.mark_read('redmine', issues)
         timestamp = last_read.strftime('%Y-%m-%d %H:%M:%S') if last_read else 'Never'
         log.info('Read %s new issues from Redmine since %s', len(issues), timestamp)
         return issues
 
     def write_trello(self, issues):
-        """ TODO: Make write fail-safe with retries"""
         for issue in issues:
             card = self.mapper.issue_to_trello(issue)
             log.debug('Saving issue %s to Trello', issue.id)

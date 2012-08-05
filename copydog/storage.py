@@ -44,6 +44,10 @@ class Storage(object):
             return parse(value)
         return None
 
+    def reset_last_time_read(self):
+        self.redis.delete('{service_name}:last_read_time'.format(service_name='redmine'))
+        self.redis.delete('{service_name}:last_read_time'.format(service_name='trello'))
+
     def mark_read(self, service_name, items):
         pipe = self.redis.pipeline()
         pipe.set('{service_name}:last_read_time'.format(service_name=service_name),

@@ -9,6 +9,7 @@ Usage:
 
 Options:
   --config=<yaml>  Config file.
+  -f --fullsync    Full sync (all issues, opposed to date range delta sync). Needed only once.
   -v --verbose     Make verbose output.
   -q --quiet       Make no output.
   -h --help        Show this screen.
@@ -37,8 +38,9 @@ def setup_logging(arguments):
     logging.getLogger('copydog').setLevel(level)
 
 
-def execute(config_path, daemonize=False):
+def execute(config_path, full_sync=False, daemonize=False):
     config = Config.from_yaml(config_path)
+    config.set('full_sync', full_sync)
     if not config.get('clients.trello.write') and not config.get('clients.redmine.write'):
         exit('Allow at least one client write')
     watch = Watch(config)
@@ -71,11 +73,7 @@ if __name__ == '__main__':
     if arguments['flush_storage']:
         flush_storage()
 
-    if arguments.get('start') or arguments.get('stop') or arguments.get('restart'):
-        execute(arguments['--config'], daemonize=True)
-    else:
-        execute(arguments['--config'])
-
-
-
+    full_sync = arguments['--fullsync']
+    daemonize = bool(arguments.get('start') or arguments.get('stop') or arguments.get('restart'))
+    execute(arguments['--config'], full_sync=full_sync, daemonize=daemonize)
 
