@@ -155,6 +155,14 @@ These tests will pass if you have following env variables set:
 * ``TRELLO_API_KEY`` - the API key  of your Trello app
 * ``TRELLO_TOKEN`` - your consumer token to access Trello API
 
+REST API references
+^^^^^^^^^^^^^^^^^^^
+
+* `Redmine  API docs <http://www.redmine.org/projects/redmine/wiki/Rest_api>`_
+* `Trello API overview <https://trello.com/docs/index.html>`_
+* `Trello API docs <https://trello.com/docs/api/>`_
+
+
 Changelog
 =========
 ver 0.1 (TBA)
