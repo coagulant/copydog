@@ -6,7 +6,7 @@ from copydog.api.redmine import Issue
 from copydog.convertor import Mapper
 from copydog.api.trello import Card
 from copydog.utils.config import Config
-config = Config.from_yaml('tests/copydog.yml')
+config = Config.from_yaml('examples/copydog.yml')
 
 
 class IssueToCardTest(TestCase):

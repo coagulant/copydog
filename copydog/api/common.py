@@ -80,6 +80,7 @@ class ApiClient(object):
                                     headers=headers, data=data, params=payload)
         log.debug('Request: [%s] %s', response.request.method, response.request.full_url)
         log.debug('Request data: %s', response.request.data)
+
         try:
             response.raise_for_status()
         except requests.exceptions.HTTPError as e:

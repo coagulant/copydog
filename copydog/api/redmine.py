@@ -22,9 +22,7 @@ class Redmine(ApiClient):
         self.api_key = api_key
 
     def default_payload(self):
-        return {
-            'key': self.api_key
-        }
+        return {'key': self.api_key}
 
     def build_api_url(self, path):
         return '{host}/{path}.json'.format(host=self.host.strip('/'), path=path)
