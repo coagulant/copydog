@@ -2,7 +2,7 @@ Copydog
 -------
 
 Copydog converts issues between Redmine_ and Trello_ on the fly.
-It's a small daemon, monitoring changes in both systems and keeping
+It's a small third-party daemon, monitoring changes in both systems and keeping
 them in sync as much as possible.
 
 .. warning::
@@ -15,7 +15,7 @@ Installation
 ============
 
 Git clone the repo https://github.com/coagulant/copydog.git
-You also need a redis instance to store intermediate results of syncronization.
+You also need a Redis instance to store intermediate results of syncronization.
 
 Configuration
 =============
@@ -72,13 +72,16 @@ Storage config might be completely omitted if you're using default Redis connect
 Write flag allows copydog to modify contents on a client, set it to 0
 to disable sync writes to either redmine or trello.
 
+You can optionally provide ``tracker_id`` and/or ``fixed_version_id`` in redmine
+section to limit the number of issues being synced.
+
 Running copydog
 ===============
 To launch the app::
 
     python runner.py --config=<path_to_your_yaml_config>
 
-Copydog will start monitoring new changes in both services and mirror them accordingly.
+Copydog will start monitoring `new` changes in both services and mirror them accordingly.
 If you wish to sync all existing issues/card, use ``--fullsync`` option::
 
     python runner.py --fullsync --config=<path_to_your_yaml_config>
@@ -94,6 +97,15 @@ Copydog will run in background unless you stop it::
 
     python runner.py stop --config=<path_to_your_yaml_config>
 
+How it works
+============
+Copydog polls both Redmine and Trello in turns, converting data from one service to
+the other. It queries first service for issues, updated since the last read and stores
+their identifiers and timestamps in redis. If there are any, they're converted_ into
+sister service type. Copygod tracks both new issues/cards and updates of existing ones
+by storing references to another ids.
+
+.. _converted:
 
 Fields mapping
 ^^^^^^^^^^^^^^
