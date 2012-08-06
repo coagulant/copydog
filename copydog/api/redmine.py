@@ -27,6 +27,19 @@ class Redmine(ApiClient):
     def build_api_url(self, path):
         return '{host}/{path}.json'.format(host=self.host.strip('/'), path=path)
 
+    def get(self, path, single_key=False, **payload):
+        while True:
+            data = self.method('get', path, **payload)
+            if single_key:
+                yield data[single_key]
+            else:
+                for item in data[path]:
+                    yield item
+            total_read = data.get('offset', 0) + data.get('limit', 0)
+            if payload.get('limit') or total_read >= data.get('total_count', 0):
+                break
+            payload['offset'] = total_read
+
     def post(self, path, data=None, **payload):
         return self.method('post', path, json.dumps(data), headers={'Content-Type': 'application/json'}, **payload)
 
@@ -36,7 +49,7 @@ class Redmine(ApiClient):
                            headers={'Content-Type': 'application/json'}, **payload)
 
     def issues(self, inverse=None, updated__after=None, **kwargs):
-        """ Get a list of issues
+        """ Issue generator
 
         :param page: (optional) page number
         :param offset (optional): skip this number of issues in response
@@ -57,42 +70,40 @@ class Redmine(ApiClient):
         if updated__after:
             kwargs['updated_on'] = '>={0}'.format(updated__after.date().isoformat())
 
-        issues = [Issue(self, **data) for data in self.get('issues', **kwargs)['issues']]
-        log.debug('Got whole lot of %s cards from Redmine', len(issues))
-
-        # Redmine doesn't allow granular search by timestamp, so filtering manually
-        if updated__after:
-            issues = filter(lambda issue: issue.updated_on > updated__after, issues)
-
-        return issues
+        for data in self.get('issues', **kwargs):
+            issue = Issue(self, **data)
+            # Redmine doesn't allow granular search by timestamp, so filtering manually
+            if updated__after and data.updated_on <= updated__after:
+                continue
+            yield issue
 
     def projects(self):
         """ Get a list of projects
         """
-        projects = self.get('projects')['projects']
-        return [Project(self, **data) for data in projects]
+        for data in self.get('projects'):
+            yield Project(self, **data)
 
     def trackers(self):
         """ Get a list of trackers
         """
-        trackers = self.get('trackers')['trackers']
-        return [Tracker(self, **data) for data in trackers]
+        for data in self.get('trackers'):
+            yield Tracker(self, **data)
 
     def statuses(self):
         """ Get a list of statuses
 
         Ref: http://www.redmine.org/projects/redmine/wiki/Rest_IssueStatuses
         """
-        statuses = self.get('issue_statuses')['issue_statuses']
-        return [Status(self, **data) for data in statuses]
+        for data in self.get('issue_statuses'):
+            yield Status(self, **data)
 
     def users(self):
         """ Get a list of all users
 
         Ref: http://www.redmine.org/projects/redmine/wiki/Rest_Users
         """
-        users = self.get('users')['users']
-        return [User(self, **data) for data in users]
+        for data in self.get('users'):
+            yield User(self, **data)
 
 
 class Project(ApiObject):
@@ -149,9 +160,9 @@ class Issue(ApiObject):
 
         We need it, because save method doesn't return card timestamp on PUT.
         """
-        result = self.client.get('issues/{issue_id}'.format(issue_id=self.id))
-        self._data = result['issue']
-        return result
+        result = self.client.get('issues/{issue_id}'.format(issue_id=self.id), single_key='issue')
+        self._data = next(result)
+        return self
 
     @property
     def last_updated(self):

@@ -59,6 +59,7 @@ class Trello(ApiClient):
 
         if updated__after:
             cards = filter(lambda card: updated__after and card.last_updated > updated__after, cards)
+            log.debug('Filtering cards, whose last_updated > %s', updated__after)
 
         return cards
 
@@ -87,6 +88,13 @@ class Card(ApiObject):
         :param idList: list id
         :param url: (optional) URL
     """
+
+    def __unicode__(self):
+        return u'<{class_name} {identifier} @ {last_updated}>'.format(
+            class_name=self.__class__.__name__,
+            identifier=self._uid,
+            last_updated=self.last_updated
+        )
 
     def validate(self):
         assert self.name is not None
@@ -117,7 +125,7 @@ class Card(ApiObject):
         """
         result = self.client.get('cards/{card_id}'.format(card_id=self.id), actions='all')
         self._data = result
-        return result
+        return self
 
     @property
     def last_updated(self):

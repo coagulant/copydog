@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
-from unittest.case import TestCase
 import datetime
+import os
+import types
+from unittest.case import TestCase
 from dateutil.tz import tzoffset
 from nose.plugins.attrib import attr
-import os
-from copydog.api.redmine import Redmine, Issue
+from copydog.api.redmine import Redmine, Issue, Project, Status
 
 
 @attr('http', 'redmine')
@@ -20,25 +21,24 @@ class TestRedmine(TestCase):
     def test_connect_public_api(self):
         r = Redmine(host='http://redmine.org')
         issues = r.issues()
-        self.assertTrue(type(issues) is list)
-        self.assertTrue(len(issues) > 0)
+        self.assertTrue(isinstance(issues, types.GeneratorType))
+        self.assertTrue(next(issues), Issue)
 
     def test_connect_protected_api(self):
         issues = self.r.issues()
-        self.assertTrue(type(issues) is list)
+        self.assertTrue(next(issues), Issue)
 
     def test_projects(self):
         projects = self.r.projects()
-        self.assertTrue(type(projects) is list)
+        self.assertTrue(type(next(projects)) is Project)
 
-    def test_issues(self):
+    def test_issues_limit(self):
         issues = self.r.issues(limit=1)
-        self.assertTrue(type(issues) is list)
-        self.assertTrue(len(issues) <= 1)
+        self.assertTrue(len(list(issues)) <= 1)
 
     def test_statuses(self):
         statuses = self.r.statuses()
-        self.assertTrue(type(statuses) is list)
+        self.assertTrue(type(next(statuses, Status())) is Status)
 
 
 @attr('redmine')

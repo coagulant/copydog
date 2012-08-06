@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from logging import getLogger
+import pprint
 import time
 import sched
 from api.redmine import Redmine
@@ -8,6 +9,7 @@ from copydog.utils.task import periodic
 from storage import Storage
 from api.trello import Trello
 log = getLogger('copydog')
+pp = pprint.PrettyPrinter(indent=4)
 
 
 class Watch(object):
@@ -101,13 +103,13 @@ class Watch(object):
             log.debug('%s', card._data)
             issue = self.mapper.card_to_redmine(card)
             log.debug('Saving card %s to Redmine', card.id)
-            log.debug('%s', issue._data)
+            log.debug('%s', pp.pformat(issue._data))
             issue.save()
 
             # Currently can't update issue journal to leave a comment
             # http://www.redmine.org/issues/10171
 
             issue.fetch()
-            log.debug('%s', issue._data)
+            log.debug('%s', pp.pformat(issue._data))
             self.storage.mark_written('redmine', issue, foreign_id=card.id)
         log.info('Converted %s new cards to Redmine', len(cards))

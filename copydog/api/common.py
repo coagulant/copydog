@@ -27,7 +27,7 @@ class ApiObject(object):
         data = self.prepare_dates(data)
         self._data = data
         self.client = client
-        self.__uid = data.get('name', data.get('subject') or data.get('id'))
+        self._uid = data.get('name', data.get('subject') or data.get('id'))
         self.validate()
         log.debug('Instantiated API object %s' % repr(self))
 
@@ -44,7 +44,7 @@ class ApiObject(object):
         return unicode(self).encode('utf-8')
 
     def __unicode__(self):
-        return u'<{class_name} {identifier}>'.format(class_name=self.__class__.__name__, identifier=self.__uid)
+        return u'<{class_name} {identifier}>'.format(class_name=self.__class__.__name__, identifier=self._uid)
 
     def validate(self):
         """ Validate created object"""
