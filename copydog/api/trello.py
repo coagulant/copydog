@@ -89,13 +89,6 @@ class Card(ApiObject):
         :param url: (optional) URL
     """
 
-    def __unicode__(self):
-        return u'<{class_name} {identifier} @ {last_updated}>'.format(
-            class_name=self.__class__.__name__,
-            identifier=self._uid,
-            last_updated=self.last_updated
-        )
-
     def validate(self):
         assert self.name is not None
         assert self.idList is not None
