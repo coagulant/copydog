@@ -28,40 +28,47 @@ class Trello(ApiClient):
     def build_api_url(self, path):
         return '{host}/{path}'.format(host=self.host.strip('/'), path=path)
 
+    def get_many(self, path, **payload):
+        json = self.method('get', path, **payload)
+        for item in json:
+            yield item
+
     def boards(self):
         """ Get a list of boards
         """
-        json = self.get('members/me/boards/')
-        return [Board(self, **data) for data in json]
+        for data in self.get_many('members/me/boards/'):
+            yield Board(self, **data)
 
     def lists(self, board_id):
         """ Get list of lists :)
         """
-        json = self.get('boards/{board_id}/lists'.format(board_id=board_id))
-        return [List(self, **data) for data in json]
+        for data in self.get_many('boards/{board_id}/lists'.format(board_id=board_id)):
+            yield List(self, **data)
 
     def members(self, board_id):
         """ Get list of lists :)
         """
-        json = self.get('boards/{board_id}/members'.format(board_id=board_id))
-        return [Member(self, **data) for data in json]
+        for data in self.get_many('boards/{board_id}/members'.format(board_id=board_id)):
+            yield Member(self, **data)
 
     def cards(self, board_id, **kwargs):
         """ Get a list of cards
 
         :param board_id: The id of board to look for cards
         """
-        updated__after = kwargs.pop('updated__after')
+        updated__after = kwargs.pop('updated__after', None)
+        num_cards_recieved = 0
 
-        json = self.get('boards/{board_id}/cards/'.format(board_id=board_id), **kwargs)
-        cards = [Card(self, **data) for data in json]
-        log.debug('Got whole lot of %s cards from Trello board', len(cards))
+        for data in self.get_many('boards/{board_id}/cards'.format(board_id=board_id)):
+            num_cards_recieved += 1
+            card = Card(self, **data)
+            if updated__after and card.last_updated <= updated__after:
+                continue
+            yield card
 
+        log.debug('Got whole lot of %s cards from Trello board', num_cards_recieved)
         if updated__after:
-            cards = filter(lambda card: updated__after and card.last_updated > updated__after, cards)
             log.debug('Filtering cards, whose last_updated > %s', updated__after)
-
-        return cards
 
 
 class Board(ApiObject):
@@ -124,6 +131,3 @@ class Card(ApiObject):
     def last_updated(self):
         return parse(self.actions[0]['date'])
 
-
-class List(ApiObject):
-    """ Trello list"""

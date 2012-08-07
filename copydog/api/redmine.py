@@ -27,14 +27,11 @@ class Redmine(ApiClient):
     def build_api_url(self, path):
         return '{host}/{path}.json'.format(host=self.host.strip('/'), path=path)
 
-    def get(self, path, single_key=False, **payload):
+    def get_many(self, path, **payload):
         while True:
             data = self.method('get', path, **payload)
-            if single_key:
-                yield data[single_key]
-            else:
-                for item in data[path]:
-                    yield item
+            for item in data[path]:
+                yield item
             total_read = data.get('offset', 0) + data.get('limit', 0)
             if payload.get('limit') or total_read >= data.get('total_count', 0):
                 break
@@ -70,7 +67,7 @@ class Redmine(ApiClient):
         if updated__after:
             kwargs['updated_on'] = '>={0}'.format(updated__after.date().isoformat())
 
-        for data in self.get('issues', **kwargs):
+        for data in self.get_many('issues', **kwargs):
             issue = Issue(self, **data)
             # Redmine doesn't allow granular search by timestamp, so filtering manually
             if updated__after and data.updated_on <= updated__after:
@@ -80,13 +77,13 @@ class Redmine(ApiClient):
     def projects(self):
         """ Get a list of projects
         """
-        for data in self.get('projects'):
+        for data in self.get_many('projects'):
             yield Project(self, **data)
 
     def trackers(self):
         """ Get a list of trackers
         """
-        for data in self.get('trackers'):
+        for data in self.get_many('trackers'):
             yield Tracker(self, **data)
 
     def statuses(self):
@@ -94,7 +91,7 @@ class Redmine(ApiClient):
 
         Ref: http://www.redmine.org/projects/redmine/wiki/Rest_IssueStatuses
         """
-        for data in self.get('issue_statuses'):
+        for data in self.get_many('issue_statuses'):
             yield Status(self, **data)
 
     def users(self):
@@ -102,7 +99,7 @@ class Redmine(ApiClient):
 
         Ref: http://www.redmine.org/projects/redmine/wiki/Rest_Users
         """
-        for data in self.get('users'):
+        for data in self.get_many('users'):
             yield User(self, **data)
 
 
@@ -160,8 +157,8 @@ class Issue(ApiObject):
 
         We need it, because save method doesn't return card timestamp on PUT.
         """
-        result = self.client.get('issues/{issue_id}'.format(issue_id=self.id), single_key='issue')
-        self._data = next(result)
+        result = self.client.get('issues/{issue_id}'.format(issue_id=self.id))
+        self._data = result['issue']
         return self
 
     @property
