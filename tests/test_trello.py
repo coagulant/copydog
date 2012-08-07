@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from unittest.case import TestCase
+from unittest import TestCase
 from nose.plugins.attrib import attr
 import os
 from copydog.api.trello import Trello, Board, Card, List, Member

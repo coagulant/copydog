@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from unittest.case import TestCase
+from unittest import TestCase
 import datetime
 from mock import Mock, patch
 from copydog.api.redmine import Issue

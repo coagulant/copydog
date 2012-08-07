@@ -2,7 +2,7 @@
 import datetime
 import os
 import types
-from unittest.case import TestCase
+from unittest import TestCase
 from dateutil.tz import tzoffset
 from nose.plugins.attrib import attr
 from copydog.api.redmine import Redmine, Issue, Project, Status
