@@ -59,7 +59,7 @@ class Trello(ApiClient):
         updated__after = kwargs.pop('updated__after', None)
         num_cards_recieved = 0
 
-        for data in self.get_many('boards/{board_id}/cards'.format(board_id=board_id)):
+        for data in self.get_many('boards/{board_id}/cards'.format(board_id=board_id), **kwargs):
             num_cards_recieved += 1
             card = Card(self, **data)
             if updated__after and card.last_updated <= updated__after:
@@ -67,8 +67,6 @@ class Trello(ApiClient):
             yield card
 
         log.debug('Got whole lot of %s cards from Trello board', num_cards_recieved)
-        if updated__after:
-            log.debug('Filtering cards, whose last_updated > %s', updated__after)
 
 
 class Board(ApiObject):

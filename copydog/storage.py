@@ -49,13 +49,18 @@ class Storage(object):
         self.redis.delete('{service_name}:last_read_time'.format(service_name='trello'))
 
     def mark_read(self, service_name, items):
+        """ Returns number of read items
+        """
+        num_items_read = 0
         pipe = self.redis.pipeline()
         pipe.set('{service_name}:last_read_time'.format(service_name=service_name),
             datetime.datetime.utcnow().replace(tzinfo = pytz.utc))
         for item in items:
             pipe.hset('{service_name}:items:{id}'.format(service_name=service_name, id=item.id),
                       'updated', item.last_updated)
+            num_items_read += 1
         pipe.execute()
+        return num_items_read
 
     def mark_written(self, service_name, item, foreign_id):
         other_service = 'redmine' if service_name == 'trello' else 'trello'

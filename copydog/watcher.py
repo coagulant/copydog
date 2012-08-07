@@ -67,13 +67,15 @@ class Watch(object):
                                                 fixed_version_id=self.config.get('clients.redmine.fixed_version_id')
         )
         # maybe check if issue is already synced
-        self.storage.mark_read('redmine', issues)
+        num_read = self.storage.mark_read('redmine', issues)
         timestamp = last_read.strftime('%Y-%m-%d %H:%M:%S') if last_read else 'Never'
-        log.info('Read %s new issues from Redmine since %s', len(issues), timestamp)
+        log.info('Read %s new issues from Redmine since %s', num_read, timestamp)
         return issues
 
     def write_trello(self, issues):
+        num_issues = 0
         for issue in issues:
+            num_issues += 1
             card = self.mapper.issue_to_trello(issue)
             log.debug('Saving issue %s to Trello', issue.id)
             log.debug('%s', card._data)
@@ -86,20 +88,22 @@ class Watch(object):
             card.fetch()
             log.debug('%s', card._data)
             self.storage.mark_written('trello', card, foreign_id=issue.id)
-        log.info('Converted %s new issues to Trello', len(issues))
+        log.info('Converted %s new issues to Trello', num_issues)
 
     def read_trello(self):
         last_read = self.storage.get_last_time_read('trello')
         cards = self.clients['trello'].cards(updated__after=last_read,
                                              board_id=self.config.require('clients.trello.board_id'),
                                              actions='all')
-        self.storage.mark_read('trello', cards)
+        num_read = self.storage.mark_read('trello', cards)
         timestamp = last_read.strftime('%Y-%m-%d %H:%M:%S') if last_read else 'Never'
-        log.info('Read %s new cards from Trello since %s', len(cards), timestamp)
+        log.info('Read %s new cards from Trello since %s', num_read, timestamp)
         return cards
 
     def write_redmine(self, cards):
+        num_cards = 0
         for card in cards:
+            num_cards += 1
             log.debug('%s', card._data)
             issue = self.mapper.card_to_redmine(card)
             log.debug('Saving card %s to Redmine', card.id)
@@ -112,4 +116,4 @@ class Watch(object):
             issue.fetch()
             log.debug('%s', pp.pformat(issue._data))
             self.storage.mark_written('redmine', issue, foreign_id=card.id)
-        log.info('Converted %s new cards to Redmine', len(cards))
+        log.info('Converted %s new cards to Redmine', num_cards)
