@@ -22,7 +22,6 @@ from daemon.runner import DaemonRunner
 from docopt import docopt
 import copydog
 from copydog.storage import Storage
-from copydog.utils import storage_browser
 from copydog.utils.config import Config
 from copydog.watcher import Watch
 
@@ -68,6 +67,7 @@ if __name__ == '__main__':
     setup_logging(arguments)
 
     if arguments['debug_storage']:
+        from copydog.utils import storage_browser
         storage_browser.main()
 
     if arguments['flush_storage']:
