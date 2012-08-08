@@ -14,8 +14,12 @@ Installation
 ============
 
 Git clone the repo https://github.com/coagulant/copydog.git
-
 You also need a Redis instance to store intermediate results of syncronization.
+
+Copydog is not yet available as package, so please install dependencies
+manualy (they're listed in setup.py).
+
+Copydog runs on python 2.6-2.7 only. Python 3 support is planned in future releases.
 
 Configuration
 =============
