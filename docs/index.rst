@@ -51,13 +51,19 @@ and click ``Show link`` under ``API access key`` section.
 Example config
 ^^^^^^^^^^^^^^
 Copydog reads config variables from yaml files, so we need to make one.
-Here is how config file might look like::
+Here is how config file might look like:
+
+.. code-block:: yaml
 
     clients:
-        redmine:
+      redmine:
+        host: http://redmine.org
+            api_key: ac7785e2c593ad6d7f539f2f90be26ba0851d18a
             project_id: playground
             write: 1
         trello:
+            api_key: 9e90d281ed678b56b041871c3651ee2d
+            token: e80a1138e0b5ea08d506fcabe6c17196542af7ee684c6c24b6f5b79
             board_id: 4fe889e4c23b476f4a189ca5
             write: 1
     storage:
@@ -65,6 +71,16 @@ Here is how config file might look like::
         port: 6379
         db: 0
         password:None
+
+Note, how config is separated into ``clients`` and ``storage`` sections.
+Clients have to be ``redmine`` and ``trello``, with following attributes:
+
+* ``redmine``
+    * ``host`` - the host of your redmine instance
+    * ``api_key`` - your API key to access Redmine API
+* ``trello``
+    * ``api_key`` - the API key  of your Trello app
+    * ``token`` - your consumer token to access Trello API
 
 For now copydog supports syncing one redmine project with one trello board at a time,
 so you need to specify ``project_id`` (string slug or integer) and ``board_id`` (string id).
