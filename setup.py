@@ -13,7 +13,7 @@ setup(
         'pytz==2012c',
         'docopt==0.4.1',
         'PyYAML==3.10',
-        'python-daemon==1.5.5',
+        'python-daemon==1.6',
     ],
     tests_require=[
         'nose==1.1.2',
