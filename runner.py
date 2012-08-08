@@ -17,6 +17,7 @@ Options:
 """
 
 import logging
+import logging.config
 from daemon.runner import DaemonRunner
 from docopt import docopt
 import copydog
@@ -44,7 +45,10 @@ class DeamonApp(object):
     run=lambda: None
 
 def execute(config_path, full_sync=False, daemonize=False):
-    config = Config.from_yaml(config_path)
+    try:
+        config = Config.from_yaml(config_path)
+    except Exception as e:
+        exit(str(e))
     config.set('full_sync', full_sync)
     if not config.get('clients.trello.write') and not config.get('clients.redmine.write'):
         exit('Allow at least one client write')
