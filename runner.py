@@ -17,7 +17,6 @@ Options:
 """
 
 import logging
-from logging.config import dictConfig
 from daemon.runner import DaemonRunner
 from docopt import docopt
 import copydog
@@ -36,25 +35,28 @@ def setup_logging(arguments):
         level = logging.INFO
     logging.getLogger('copydog').setLevel(level)
 
+class DeamonApp(object):
+    stdin_path='/tmp/copydog.in.log'
+    stdout_path='/tmp/copydog.out.log'
+    stderr_path='/tmp/copydog.err.log'
+    pidfile_path='/tmp/copydog.pid'
+    pidfile_timeout=100
+    run=lambda: None
 
 def execute(config_path, full_sync=False, daemonize=False):
     config = Config.from_yaml(config_path)
     config.set('full_sync', full_sync)
     if not config.get('clients.trello.write') and not config.get('clients.redmine.write'):
         exit('Allow at least one client write')
+
     watch = Watch(config)
 
-    if not daemonize:
-        watch.run()
+    if daemonize:
+        app = DeamonApp()
+        app.run = watch.run
+        DaemonRunner(app).do_action()
     else:
-        class DeamonApp(object):
-            stdin_path='/tmp/copydog.in.log'
-            stdout_path='/tmp/copydog.out.log'
-            stderr_path='/tmp/copydog.err.log'
-            pidfile_path='/tmp/copydog.pid'
-            pidfile_timeout=100
-            run=watch.run
-        DaemonRunner(DeamonApp()).do_action()
+        watch.run()
 
 
 def flush_storage():
