@@ -28,6 +28,9 @@ class ConfigInitTest(unittest.TestCase):
         self.assertRaisesRegexp(ImproperlyConfigured, 'Provide either data or filepath',
                                 Config, data={'option': 'value'}, file=self.example_yml)
 
+def kwargs_test(**kwargs):
+    return True
+
 
 class ConfigAttrTest(unittest.TestCase):
     example_yml = 'examples/copydog.yml'
@@ -40,6 +43,7 @@ class ConfigAttrTest(unittest.TestCase):
 
     def test_attr_subconfig(self):
         self.assertTrue(type(self.config.clients.trello), Config)
+        self.assertTrue(kwargs_test(**self.config))
 
     def test_attr_nonexistent(self):
         with self.assertRaisesRegexp(MissigAttr, 'Missing config item clients.redmine.long_attr'):
@@ -60,5 +64,5 @@ class ConfigAttrTest(unittest.TestCase):
             self.assertTrue(type(config) is Config)
 
     def test_env_fallback(self):
-        os.environ.setdefault('CLIENTS_REDMINE_API_KEY', 'XXX')
+        os.environ.setdefault('COPYDOG_REDMINE_API_KEY', 'XXX')
         self.assertEqual(self.config.clients.redmine.api_key, 'XXX')

@@ -41,7 +41,10 @@ class Config(object):
         return '.'.join((self.__name, name)) if self.__name else name
 
     def __getfallback(self, name):
-        env_var = ('%s_%s' % (self.__name.replace('.', '_'), name)).upper()
+        parts = self.__name.split('.')
+        parts.append(name)
+        parts = ['copydog'] + parts[-2:]
+        env_var = '_'.join(parts).upper()
         if env_var in os.environ:
             return os.environ.get(env_var)
         raise MissigAttr('Missing config item %s' % self.__getname(name))
@@ -52,3 +55,9 @@ class Config(object):
     def __iter__(self):
         for key in self.__data.iterkeys():
             yield key, self.__getattr__(key)
+
+    def keys(self):
+        return self.__data.keys()
+
+    def __getitem__(self, key):
+        return self.__getattr__(key)

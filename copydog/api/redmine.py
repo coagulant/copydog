@@ -70,7 +70,7 @@ class Redmine(ApiClient):
         for data in self.get_many('issues', **kwargs):
             issue = Issue(self, **data)
             # Redmine doesn't allow granular search by timestamp, so filtering manually
-            if updated__after and data.updated_on <= updated__after:
+            if updated__after and issue.updated_on <= updated__after:
                 continue
             yield issue
 
@@ -150,7 +150,7 @@ class Issue(ApiObject):
         else:
             result = self.client.post(path='issues', data={'issue': self._data})
             self._data = result['issue']
-        return result
+        return self
 
     def fetch(self):
         """ Fetch fresh info about the issue

@@ -114,7 +114,7 @@ class Card(ApiObject):
                                  data={'value': self.idMembers[0]})
                 result['idMembers'] = self.idMembers
         self._data = result
-        return result
+        return self
 
     def fetch(self):
         """ Fetch fresh info about the card

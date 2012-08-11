@@ -3,117 +3,73 @@ from logging import getLogger
 import pprint
 import time
 import sched
-from api.redmine import Redmine
+import itertools
+from copydog.adapters import RedmineAdapter, TrelloAdapter
 from copydog.convertor import Mapper
 from copydog.utils.task import periodic
 from storage import Storage
-from api.trello import Trello
+
 log = getLogger('copydog')
 pp = pprint.PrettyPrinter(indent=4)
 
 
 class Watch(object):
+    available_services = {
+        'redmine': RedmineAdapter,
+        'trello': TrelloAdapter
+    }
 
     def __init__(self, config):
-        log.info('Copydog is watching you...')
-        self.config = config
-        self.storage = Storage(self.config.get('storage'))
-        clients_config = self.config.get_subconfig('clients')
-        self.clients = {
-            'redmine': Redmine(host=clients_config.require('redmine.host'),
-                               api_key=clients_config.require('redmine.api_key')),
-            'trello': Trello(api_key=clients_config.require('trello.api_key'),
-                             token=clients_config.require('trello.token'))
-        }
-        self.setup_last_time_read()
+        log.info('Copydog is on duty...')
+        self.storage = Storage(config.get('storage'))
+        self.services = self.setup_services(config, self.storage)
 
-        self.mapper = Mapper(storage=self.storage, clients=self.clients, config=self.config)
+        self.setup_last_time_read(config.get('full_sync'))
+
+        self.mapper = Mapper(storage=self.storage, services=self.services, config=config)
         self.mapper.save_list_status_mapping()
         self.mapper.save_user_member_mapping()
 
+    def setup_services(self, config, storage):
+        clients_config = config.clients
+        services = {}
+        for service_name, options in clients_config:
+            service_class = self.available_services[service_name]
+            services[service_name] = service_class(options, storage)
+        return services
 
-    def setup_last_time_read(self):
+    def setup_last_time_read(self, full_sync):
         """ Ignoring last time read, when using full_sync,
-            If launching for first time, make sire we're monitoring only recent changes.
+            If launching for first time, make sure we're monitoring only recent changes.
+
+            TODO: remove hardcoded services
         """
-        if self.config.get('full_sync'):
+        if full_sync:
             self.storage.reset_last_time_read()
         else:
             if not self.storage.get_last_time_read('redmine'):
-                self.storage.mark_read('redmine', [])
-                self.storage.mark_read('trello', [])
-
-    def sync(self):
-        if self.config.get('clients.trello.write'):
-            issues = self.read_redmine()
-            if issues:
-                self.write_trello(issues)
-
-        if self.config.get('clients.redmine.write'):
-            cards = self.read_trello()
-            if cards:
-                self.write_redmine(cards)
+                self.storage.mark_read('redmine')
+                self.storage.mark_read('trello')
 
     def run(self):
+        """ Run copydog in loop, starting sync every 60 seconds.
+        """
         scheduler = sched.scheduler(time.time, time.sleep)
         periodic(scheduler, 60, self.sync)
         scheduler.run()
 
-    def read_redmine(self):
-        last_read = self.storage.get_last_time_read('redmine')
-        issues = self.clients['redmine'].issues(updated__after=last_read,
-                                                tracker_id=self.config.get('clients.redmine.tracker_id'),
-                                                project_id=self.config.require('clients.redmine.project_id'),
-                                                fixed_version_id=self.config.get('clients.redmine.fixed_version_id')
-        )
-        # maybe check if issue is already synced
-        num_read = self.storage.mark_read('redmine', issues)
-        timestamp = last_read.strftime('%Y-%m-%d %H:%M:%S') if last_read else 'Never'
-        log.info('Read %s new issues from Redmine since %s', num_read, timestamp)
-        return issues
+    def sync(self):
+        groups = itertools.groupby(itertools.permutations(self.services, 2), lambda x:x[0])
+        for service_from_name, services in groups:
+            service_from = self.services[service_from_name]
+            issues = service_from.read()
+            num_issues_read = 0
+            for issue in issues:
+                num_issues_read += 1
+                service_from.mark_read(issue)
+                for service_from_name, service_to_name in services:
+                    service_to = self.services[service_to_name]
+                    if service_to.writable:
+                        service_to.write(issue)
+            log.info('Read %s new issues from %s', num_issues_read, service_from)
 
-    def write_trello(self, issues):
-        num_issues = 0
-        for issue in issues:
-            num_issues += 1
-            card = self.mapper.issue_to_trello(issue)
-            log.debug('Saving issue %s to Trello', issue.id)
-            log.debug('%s', card._data)
-            card.save()
-
-            # Let's create a comment with redmine reference
-            self.clients['trello'].post(path='cards/{card_id}/actions/comments'.format(card_id=card.id),
-                data={'text': 'Redmine: {0}'.format(issue.get_url())})
-
-            card.fetch()
-            log.debug('%s', card._data)
-            self.storage.mark_written('trello', card, foreign_id=issue.id)
-        log.info('Converted %s new issues to Trello', num_issues)
-
-    def read_trello(self):
-        last_read = self.storage.get_last_time_read('trello')
-        cards = self.clients['trello'].cards(updated__after=last_read,
-                                             board_id=self.config.require('clients.trello.board_id'),
-                                             actions='all')
-        num_read = self.storage.mark_read('trello', cards)
-        timestamp = last_read.strftime('%Y-%m-%d %H:%M:%S') if last_read else 'Never'
-        log.info('Read %s new cards from Trello since %s', num_read, timestamp)
-        return cards
-
-    def write_redmine(self, cards):
-        num_cards = 0
-        for card in cards:
-            num_cards += 1
-            log.debug('%s', card._data)
-            issue = self.mapper.card_to_redmine(card)
-            log.debug('Saving card %s to Redmine', card.id)
-            log.debug('%s', pp.pformat(issue._data))
-            issue.save()
-
-            # Currently can't update issue journal to leave a comment
-            # http://www.redmine.org/issues/10171
-
-            issue.fetch()
-            log.debug('%s', pp.pformat(issue._data))
-            self.storage.mark_written('redmine', issue, foreign_id=card.id)
-        log.info('Converted %s new cards to Redmine', num_cards)

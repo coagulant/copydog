@@ -5,7 +5,7 @@ Copydog syncs Redmine and Trello.
 Usage:
   runner.py --config=<yaml> [options]
   runner.py (start|stop|restart) --config=<yaml> [options]
-  runner.py debug_storage|flush_storage [options]
+  runner.py (debug_storage|flush_storage) [options]
 
 Options:
   --config=<yaml>  Config file.
@@ -45,12 +45,16 @@ class DeamonApp(object):
     run=lambda: None
 
 def execute(config_path, full_sync=False, daemonize=False):
+    config = Config()
     try:
-        config = Config.from_yaml(config_path)
+        config = Config(file=config_path)
     except Exception as e:
         exit(str(e))
-    config.set('full_sync', full_sync)
-    if not config.get('clients.trello.write') and not config.get('clients.redmine.write'):
+
+    config.full_sync = full_sync
+    writable = False
+
+    if not any(map(lambda item: item[1].get('write'), config.clients)):
         exit('Allow at least one client write')
 
     watch = Watch(config)
@@ -64,8 +68,14 @@ def execute(config_path, full_sync=False, daemonize=False):
 
 
 def flush_storage():
-    storage = Storage()
-    storage.flush()
+    """ Erase all copydog keys and values from storage"""
+    msg = 'This is irreversible operation, please confirm you want to empty copydog storage.'
+    shall = True if raw_input("%s (y/N) " % msg).lower() == 'y' else False
+    if shall:
+        storage = Storage()
+        storage.flush()
+    else:
+        print 'No action taken'
 
 
 if __name__ == '__main__':
@@ -75,9 +85,11 @@ if __name__ == '__main__':
     if arguments['debug_storage']:
         from copydog.utils import storage_browser
         storage_browser.main()
+        exit()
 
     if arguments['flush_storage']:
         flush_storage()
+        exit()
 
     full_sync = arguments['--fullsync']
     daemonize = bool(arguments.get('start') or arguments.get('stop') or arguments.get('restart'))

@@ -4,4 +4,4 @@ clients:
         write: 1
     trello:
         board_id: 4fe889e4c23b476f4a189ca5
-        write: 0
+        write: 1

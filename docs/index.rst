@@ -123,7 +123,8 @@ Copydog polls both Redmine and Trello in turns, converting data from one service
 the other. It queries first service for issues, updated since the last read and stores
 their identifiers and timestamps in redis. If there are any, they're converted_ into
 sister service type. Copygod tracks both new issues/cards and updates of existing ones
-by storing references to another ids.
+by storing references to another ids. Trello cards are created with comments,
+referencing urls to corresponding redmine issues.
 
 .. _converted:
 
@@ -170,10 +171,10 @@ Some tests make actual API read requests, but they're disabled by default, to ru
 
 These tests will pass if you have following env variables set:
 
-* ``REDMINE_HOST`` - the host of your redmine instance
-* ``REDMINE_API_KEY`` - your API key to access Redmine API
-* ``TRELLO_API_KEY`` - the API key  of your Trello app
-* ``TRELLO_TOKEN`` - your consumer token to access Trello API
+* ``COPYDOG_REDMINE_HOST`` - the host of your redmine instance
+* ``COPYDOG_REDMINE_API_KEY`` - your API key to access Redmine API
+* ``COPYDOG_TRELLO_API_KEY`` - the API key  of your Trello app
+* ``COPYDOG_TRELLO_TOKEN`` - your consumer token to access Trello API
 
 REST API references
 ^^^^^^^^^^^^^^^^^^^
