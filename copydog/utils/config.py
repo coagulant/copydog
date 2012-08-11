@@ -2,40 +2,53 @@
 import os
 import yaml
 
-
 class ImproperlyConfigured(Exception):
-    """ Something wrong with config file"""
+    """ Something wrong with config file
+    """
 
+class MissigAttr(AttributeError):
+    """ Config doesn't have specific value
+    """
 
 class Config(object):
-    """  Config object for copydog"""
+    """ Object-like config with dict inside.
+    """
 
-    def __init__(self, data):
-        self._data = data
+    def __init__(self, data=None, file=None, name=''):
+        if data and file:
+            raise ImproperlyConfigured('Provide either data or filepath')
+        if file:
+            data = yaml.load(open(file))
+        self.__data = data or {}
+        self.__name = name
 
-    @classmethod
-    def from_yaml(cls, filepath):
-        return cls(yaml.load(open(filepath)))
+    def get(self, key, value=None):
+        return self.__data.get(key, value)
 
-    def get_subconfig(self, name):
-        return Config(self._data[name])
-
-    def get(self, path, default=None, fallback=True):
+    def __getattr__(self, name):
         try:
-            result = self._data
-            for part in path.split('.'):
-                result = result[part]
-            return result
+            attr = self.__data[name]
         except KeyError:
-            key = path.replace('.', '_').upper()
-            if key in os.environ:
-                return os.environ[key]
-            if fallback:
-                return default
-            raise ImproperlyConfigured('Missing config %s' % path)
+            return self.__getfallback(name)
 
-    def set(self, path, value):
-        self._data[path] = value
+        if type(attr) == dict:
+            # creating subconfig
+            return Config(attr, name=self.__getname(name))
+        else:
+            return attr
 
-    def require(self, path):
-        return self.get(path, fallback=False)
+    def __getname(self, name):
+        return '.'.join((self.__name, name)) if self.__name else name
+
+    def __getfallback(self, name):
+        env_var = ('%s_%s' % (self.__name.replace('.', '_'), name)).upper()
+        if env_var in os.environ:
+            return os.environ.get(env_var)
+        raise MissigAttr('Missing config item %s' % self.__getname(name))
+
+    def __str__(self):
+        return self.__name
+
+    def __iter__(self):
+        for key in self.__data.iterkeys():
+            yield key, self.__getattr__(key)
