@@ -44,12 +44,19 @@ class Storage(object):
             return parse(value)
         return None
 
+    def get_last_time_updated(self, service_name, item):
+        value = self.redis.hget('{service_name}:items:{id}'.format(service_name=service_name, id=item.id), 'updated')
+        if value:
+            return parse(value)
+        return None
+
     def reset_last_time_read(self):
         self.redis.delete('{service_name}:last_read_time'.format(service_name='redmine'))
         self.redis.delete('{service_name}:last_read_time'.format(service_name='trello'))
 
     def mark_read(self, service_name, item=None):
         pipe = self.redis.pipeline()
+        # FIXME: last_read_time must be latest issue, not first
         pipe.set('{service_name}:last_read_time'.format(service_name=service_name),
             datetime.datetime.utcnow().replace(tzinfo = pytz.utc))
         if item:

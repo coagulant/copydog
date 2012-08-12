@@ -64,5 +64,5 @@ class ConfigAttrTest(unittest.TestCase):
             self.assertTrue(type(config) is Config)
 
     def test_env_fallback(self):
-        os.environ.setdefault('COPYDOG_REDMINE_API_KEY', 'XXX')
+        os.environ['COPYDOG_REDMINE_API_KEY'] = 'XXX'
         self.assertEqual(self.config.clients.redmine.api_key, 'XXX')

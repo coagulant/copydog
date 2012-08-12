@@ -10,6 +10,8 @@ class TrelloException(ApiException):
 
 
 class Trello(ApiClient):
+    """ Trello API class """
+    service_name = 'trello'
 
     def __init__(self, api_key=None, token=None):
         """ Creates api client instance.
@@ -93,6 +95,7 @@ class Card(ApiObject):
         :param idList: list id
         :param url: (optional) URL
     """
+    created = False
 
     def validate(self):
         assert self.name is not None
@@ -109,10 +112,11 @@ class Card(ApiObject):
         else:
             result = self.client.post(path='cards', data=self._data)
             # Trello doesn't allow to assign cards on creation
-            if self.get('idMembers'):
+            if self.idMembers[0]:
                 self.client.post(path='cards/{card_id}/members'.format(card_id=result['id']),
                                  data={'value': self.idMembers[0]})
                 result['idMembers'] = self.idMembers
+            self.created = True
         self._data = result
         return self
 
@@ -128,4 +132,7 @@ class Card(ApiObject):
     @property
     def last_updated(self):
         return parse(self.actions[0]['date'])
+
+    def is_created(self):
+        return self.created
 

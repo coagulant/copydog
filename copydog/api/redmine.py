@@ -11,6 +11,7 @@ class RedmineException(ApiException):
 
 class Redmine(ApiClient):
     """ Redmine API class """
+    service_name = 'redmine'
 
     def __init__(self, host, api_key=None):
         """ Creates api client instance.
@@ -70,8 +71,11 @@ class Redmine(ApiClient):
         for data in self.get_many('issues', **kwargs):
             issue = Issue(self, **data)
             # Redmine doesn't allow granular search by timestamp, so filtering manually
+            log.debug('Issue comparing %s > %s' % (issue.updated_on, updated__after))
             if updated__after and issue.updated_on <= updated__after:
+                log.debug('ignoring')
                 continue
+            log.debug('passed')
             yield issue
 
     def projects(self):
@@ -126,6 +130,7 @@ class Issue(ApiObject):
         :param subject: issue name
         :param description: description
     """
+    created = False
     date_fields = ('updated_on', 'created_on')
 
     def get_url(self):
@@ -146,10 +151,13 @@ class Issue(ApiObject):
         }
         """
         if self.get('id'):
-            result = self.client.put(path='issues/{issue_id}'.format(issue_id=self.id), data={'issue': self._data})
+            result = self.client.put(path='issues/{issue_id}'.format(
+                issue_id=self.id),
+                data={'issue': self._data})
         else:
             result = self.client.post(path='issues', data={'issue': self._data})
             self._data = result['issue']
+            self.created = True
         return self
 
     def fetch(self):
@@ -165,3 +173,5 @@ class Issue(ApiObject):
     def last_updated(self):
         return self.updated_on
 
+    def is_created(self):
+        return self.created

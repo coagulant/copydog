@@ -31,9 +31,9 @@ class BaseAdapter(object):
     def read(self):
         """ Read issues suitable for syncing from client
         """
-        last_read = self.storage.get_last_time_read(self.service_name)
-        # TODO: maybe check if issue is already synced to prevent clones
-        issues = self.get_issues_since_last_sync(last_read)
+        last_time_read = self.storage.get_last_time_read(self.service_name)
+        log.debug('Reading %s since %s' % (self.service_name, last_time_read))
+        issues = self.get_issues_since_last_sync(last_time_read)
         return issues
 
     def mark_read(self, issue):
@@ -56,10 +56,12 @@ class BaseAdapter(object):
         log.debug('Saving issue %s to %s', foreign_issue.id, self.service_name)
         log.debug('%s', foreign_issue._data)
         local_issue = self.convert_to_local_issue(foreign_issue)
+        log.debug('%s', local_issue)
         local_issue.save()
-        self.add_foreign_issue_reference(issue=local_issue, foreign_issue=foreign_issue)
+        if local_issue.is_created():
+            self.add_foreign_issue_reference(issue=local_issue, foreign_issue=foreign_issue)
         local_issue.fetch()
-        self.storage.mark_written(self.name, local_issue, foreign_id=foreign_issue.id)
+        self.storage.mark_written(self.service_name, local_issue, foreign_id=foreign_issue.id)
 
 
 class RedmineAdapter(BaseAdapter):
@@ -80,9 +82,15 @@ class RedmineAdapter(BaseAdapter):
     def convert_to_local_issue(self, foreign_issue):
         assert isinstance(foreign_issue, Card)
         service_from = 'trello'
+
+        if len(foreign_issue.idMembers):
+            assigned_to_id = self.storage.get_user_or_member_id(service_from, foreign_issue.idMembers[0])
+        else:
+            assigned_to_id = None
+
         issue = Issue(
             id = self.storage.get_opposite_item_id(service_from, foreign_issue.id),
-            assigned_to_id = None,
+            assigned_to_id = assigned_to_id,
             subject = foreign_issue.name,
             description = foreign_issue.desc,
             status_id = self.storage.get_list_or_status_id(service_from, foreign_issue.idList),
@@ -91,9 +99,6 @@ class RedmineAdapter(BaseAdapter):
             due_date = foreign_issue.get('due'),
             client = self.client
         )
-        if len(foreign_issue.idMembers):
-            issue.assigned_to_id = self.storage.get_user_or_member_id(service_from, foreign_issue.idMembers[0])
-
         return issue
 
     def add_foreign_issue_reference(self, issue, foreign_issue):
@@ -139,7 +144,7 @@ class TrelloAdapter(BaseAdapter):
             TODO: move .post into trello.py
         """
         text = '{service_name}: {issue_url}'.format(
-            service_name=foreign_issue.service_name,
+            service_name=foreign_issue.client.service_name,
             issue_url=foreign_issue.get_url()
         )
         self.client.post(path='cards/{card_id}/actions/comments'.format(card_id=issue.id),
