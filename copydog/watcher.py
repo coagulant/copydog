@@ -52,7 +52,7 @@ class Watch(object):
                 self.storage.mark_read('trello')
 
     def run(self):
-        """ Run copydog in loop, starting sync every 60 seconds.
+        """ Run copydog in a loop, starting sync every 60 seconds.
         """
         scheduler = sched.scheduler(time.time, time.sleep)
         periodic(scheduler, 60, self.sync)
@@ -65,16 +65,8 @@ class Watch(object):
             issues = service_from.read()
             num_issues_read = 0
             for issue in issues:
-
-                # check issue needs sync: read from API last_updated > read from storage last_updated
-                # thus preventing clones
-                last_time_synced = self.storage.get_last_time_updated(service_from, issue)
-                log.debug('Comparing %s < %s' % (issue.last_updated, last_time_synced))
-                if last_time_synced and issue.last_updated <= last_time_synced:
-                    log.debug('discarding...')
+                if self.is_already_synced(issue):
                     continue
-                log.debug('syncing, new issue')
-
                 num_issues_read += 1
                 service_from.mark_read(issue)
                 for service_from_name, service_to_name in services:
@@ -82,4 +74,14 @@ class Watch(object):
                     if service_to.writable:
                         service_to.write(issue)
             log.info('Read %s new issues from %s', num_issues_read, service_from)
+
+    def is_already_synced(self, issue):
+        """ Check issue needs sync
+
+            Read from API last_updated > read from storage last_updated
+            thus preventing clones
+        """
+        last_time_synced = self.storage.get_last_time_updated(issue.client.service_name, issue)
+        log.debug('Comparing %s <= %s' % (issue.last_updated, last_time_synced))
+        return last_time_synced and issue.last_updated <= last_time_synced
 

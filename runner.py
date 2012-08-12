@@ -52,10 +52,9 @@ def execute(config_path, full_sync=False, daemonize=False):
         exit(str(e))
 
     config.full_sync = full_sync
-    writable = False
 
     if not any(map(lambda item: item[1].get('write'), config.clients)):
-        exit('Allow at least one client write')
+        exit('Allow at least one client to write')
 
     watch = Watch(config)
 
