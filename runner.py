@@ -78,7 +78,7 @@ def flush_storage():
         print 'No action taken'
 
 
-if __name__ == '__main__':
+def main():
     arguments = docopt(__doc__, version='Copydog %s' % copydog.__version__)
     setup_logging(arguments)
 
@@ -95,3 +95,8 @@ if __name__ == '__main__':
     daemonize = bool(arguments.get('start') or arguments.get('stop') or arguments.get('restart'))
     execute(arguments['--config'], full_sync=full_sync, daemonize=daemonize)
 
+if __name__ == '__main__':
+    try:
+        main()
+    except KeyboardInterrupt:
+        pass
