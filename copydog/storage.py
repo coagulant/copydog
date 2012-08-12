@@ -54,15 +54,16 @@ class Storage(object):
         self.redis.delete('{service_name}:last_read_time'.format(service_name='redmine'))
         self.redis.delete('{service_name}:last_read_time'.format(service_name='trello'))
 
-    def mark_read(self, service_name, item=None):
-        pipe = self.redis.pipeline()
-        # FIXME: last_read_time must be latest issue, not first
-        pipe.set('{service_name}:last_read_time'.format(service_name=service_name),
-            datetime.datetime.utcnow().replace(tzinfo = pytz.utc))
-        if item:
-            pipe.hset('{service_name}:items:{id}'.format(service_name=service_name, id=item.id),
-                      'updated', item.last_updated)
-        pipe.execute()
+    def mark_read(self, service_name, issue=None):
+        """ Marking read whole service if not issue provided.
+            In other case mark issue read from API.
+        """
+        if issue:
+            self.redis.hset('{service_name}:items:{id}'.format(service_name=service_name, id=issue.id),
+                      'updated', issue.last_updated)
+        else:
+            self.redis.set('{service_name}:last_read_time'.format(service_name=service_name),
+                datetime.datetime.utcnow().replace(tzinfo = pytz.utc))
 
     def mark_written(self, service_name, item, foreign_id):
         other_service = 'redmine' if service_name == 'trello' else 'trello'

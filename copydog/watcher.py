@@ -65,6 +65,7 @@ class Watch(object):
             issues = service_from.read()
             num_issues_read = 0
             for issue in issues:
+
                 # check issue needs sync: read from API last_updated > read from storage last_updated
                 # thus preventing clones
                 last_time_synced = self.storage.get_last_time_updated(service_from, issue)
@@ -73,6 +74,7 @@ class Watch(object):
                     log.debug('discarding...')
                     continue
                 log.debug('syncing, new issue')
+
                 num_issues_read += 1
                 service_from.mark_read(issue)
                 for service_from_name, service_to_name in services:

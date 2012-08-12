@@ -34,10 +34,11 @@ class BaseAdapter(object):
         last_time_read = self.storage.get_last_time_read(self.service_name)
         log.debug('Reading %s since %s' % (self.service_name, last_time_read))
         issues = self.get_issues_since_last_sync(last_time_read)
+        self.mark_read()
         return issues
 
-    def mark_read(self, issue):
-        self.storage.mark_read(self.service_name, issue)
+    def mark_read(self, issue=None):
+        self.storage.mark_read(self.service_name, issue=None)
 
     def get_issues_since_last_sync(self, last_read):
         """ Client-specific API call
