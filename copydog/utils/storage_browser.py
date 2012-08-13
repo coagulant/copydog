@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from texttable import Texttable
-from ..storage import Storage
 
 
 def print_table(prefix, items):
@@ -21,8 +20,7 @@ def print_mapping(prefix, key, items):
     print table.draw() + "\n"
 
 
-def main():
-    storage = Storage()
+def browse(storage):
     redmine_keys = storage.redis.keys(pattern='redmine:items*')
     trello_keys = storage.redis.keys(pattern='trello:items*')
     redmine_list_mapping = storage.redis.hgetall('redmine:list_status_mapping')

@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
 from logging import getLogger
-import pprint
 import time
 import sched
 import itertools
 from copydog.adapters import RedmineAdapter, TrelloAdapter
 from copydog.convertor import Mapper
+from copydog.storage.factory import StorageFactory
 from copydog.utils.task import periodic
-from storage import Storage
+
 
 log = getLogger('copydog')
-pp = pprint.PrettyPrinter(indent=4)
 
 
 class Watch(object):
@@ -21,7 +20,7 @@ class Watch(object):
 
     def __init__(self, config):
         log.info('Copydog is on duty...')
-        self.storage = Storage(config.get('storage'))
+        self.storage = StorageFactory.get(config.get('storage'))
         self.services = self.setup_services(config, self.storage)
 
         self.setup_last_time_read(config.get('full_sync'))
@@ -59,7 +58,7 @@ class Watch(object):
         scheduler.run()
 
     def sync(self):
-        groups = itertools.groupby(itertools.permutations(self.services, 2), lambda x:x[0])
+        groups = itertools.groupby(itertools.permutations(self.services, 2), lambda pair:pair[0])
         for service_from_name, services in groups:
             service_from = self.services[service_from_name]
             issues = service_from.read()

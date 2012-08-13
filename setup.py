@@ -14,12 +14,12 @@ setup(
         'docopt==0.4.1',
         'PyYAML==3.10',
         'python-daemon==1.6',
+        'texttable==0.8.1',
     ],
     tests_require=[
         'nose==1.1.2',
         'mock==1.0b1',
         'sphinx==1.1.3',
-        'texttable==0.8.1',
         'tox==1.4.2',
     ],
     url='https://github.com/coagluant/copydog',

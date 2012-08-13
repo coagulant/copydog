@@ -1,19 +1,21 @@
 # -*- coding: utf-8 -*-
 import datetime
-from logging import getLogger
-from dateutil.parser import parse
 import pytz
 import redis
-
+from dateutil.parser import parse
+from logging import getLogger
+from ..base import BaseStorage
 log = getLogger('copydog')
 
 
-class Storage(object):
+class Storage(BaseStorage):
+    """ Copydog default sotrage implementation using Redis
+    """
 
-    def __init__(self, config=None):
-        if not config:
-            config  = {}
-        self.redis = redis.StrictRedis(**config)
+    def __init__(self, storage_options=None):
+        if not storage_options:
+            storage_options  = {}
+        self.redis = redis.StrictRedis(**storage_options)
 
     def get_opposite_item_id(self, service_name, id):
         return self.redis.hget('{service_name}:items:{id}'.format(service_name=service_name, id=id), 'opposite_id')

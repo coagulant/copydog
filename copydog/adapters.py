@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 from logging import getLogger
+import pprint
 from api.trello import Trello
 from api.redmine import Redmine
 from copydog.api.redmine import Issue
 from copydog.api.trello import Card
 
 log = getLogger('copydog')
+pp = pprint.PrettyPrinter(indent=4)
 
 
 class BaseAdapter(object):
@@ -55,9 +57,9 @@ class BaseAdapter(object):
         """ Write items from other service to client
         """
         log.debug('Saving issue %s to %s', foreign_issue.id, self.service_name)
-        log.debug('%s', foreign_issue._data)
+        log.debug('%s', pp.pformat(foreign_issue._data))
         local_issue = self.convert_to_local_issue(foreign_issue)
-        log.debug('%s', local_issue)
+        log.debug('%s', pp.pformat(local_issue))
         local_issue.save()
         if local_issue.is_created():
             self.add_foreign_issue_reference(issue=local_issue, foreign_issue=foreign_issue)

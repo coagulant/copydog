@@ -21,8 +21,9 @@ import logging.config
 from daemon.runner import DaemonRunner
 from docopt import docopt
 import copydog
-from copydog.storage import Storage
+from copydog.storage.factory import StorageFactory
 from copydog.utils.config import Config
+from copydog.utils import storage_browser
 from copydog.watcher import Watch
 
 
@@ -36,6 +37,16 @@ def setup_logging(arguments):
         level = logging.INFO
     logging.getLogger('copydog').setLevel(level)
 
+
+def setup_config(config_path):
+    config = Config()
+    try:
+        config = Config(file=config_path)
+    except Exception as e:
+        exit(str(e))
+    return config
+
+
 class DeamonApp(object):
     stdin_path='/tmp/copydog.in.log'
     stdout_path='/tmp/copydog.out.log'
@@ -44,13 +55,8 @@ class DeamonApp(object):
     pidfile_timeout=100
     run=lambda: None
 
-def execute(config_path, full_sync=False, daemonize=False):
-    config = Config()
-    try:
-        config = Config(file=config_path)
-    except Exception as e:
-        exit(str(e))
 
+def execute(config, full_sync=False, daemonize=False):
     config.full_sync = full_sync
 
     if not any(map(lambda item: item[1].get('write'), config.clients)):
@@ -66,12 +72,11 @@ def execute(config_path, full_sync=False, daemonize=False):
         watch.run()
 
 
-def flush_storage():
+def flush_storage(storage):
     """ Erase all copydog keys and values from storage"""
     msg = 'This is irreversible operation, please confirm you want to empty copydog storage.'
     shall = True if raw_input("%s (y/N) " % msg).lower() == 'y' else False
     if shall:
-        storage = Storage()
         storage.flush()
     else:
         print 'No action taken'
@@ -80,19 +85,19 @@ def flush_storage():
 def main():
     arguments = docopt(__doc__, version='Copydog %s' % copydog.__version__)
     setup_logging(arguments)
+    config = setup_config(arguments['--config'])
+    storage = StorageFactory.get(config.get('storage'))
 
     if arguments['debug_storage']:
-        from copydog.utils import storage_browser
-        storage_browser.main()
+        storage_browser.browse(storage)
         exit()
 
     if arguments['flush_storage']:
-        flush_storage()
+        flush_storage(storage)
         exit()
 
-    full_sync = arguments['--fullsync']
     daemonize = bool(arguments.get('start') or arguments.get('stop') or arguments.get('restart'))
-    execute(arguments['--config'], full_sync=full_sync, daemonize=daemonize)
+    execute(config, full_sync=arguments['--fullsync'], daemonize=daemonize)
 
 if __name__ == '__main__':
     try:
