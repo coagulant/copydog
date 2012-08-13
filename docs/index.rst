@@ -5,16 +5,20 @@ Copydog converts issues between Redmine_ and Trello_ on the fly.
 It's a small third-party daemon, monitoring changes in both systems and keeping
 them in sync as much as possible.
 
+You might find this tool useful after reading `How it works`_.
+
 .. warning::
     Copydog is in active development, it's not ready for production yet.
     However, please, feel free to experiment/test and use the code.
 
+.. _Redmine: http://redmine.org/
+.. _Trello: http://trello.com/
 
 Installation
 ============
 
 Git clone the repo https://github.com/coagulant/copydog.git
-You also need a Redis instance to store intermediate results of syncronization.
+You also need a Redis_ instance to store intermediate results of syncronization.
 
 Copydog is not yet available as package, so please install dependencies
 manualy (they're listed in setup.py).
@@ -62,15 +66,16 @@ Here is how config file might look like:
     clients:
       redmine:
         host: http://redmine.org
-            api_key: ac7785e2c593ad6d7f539f2f90be26ba0851d18a
-            project_id: playground
-            write: 1
+          api_key: ac7785e2c593ad6d7f539f2f90be26ba0851d18a
+          project_id: playground
+          write: 1
         trello:
-            api_key: 9e90d281ed678b56b041871c3651ee2d
-            token: e80a1138e0b5ea08d506fcabe6c17196542af7ee684c6c24b6f5b79
-            board_id: 4fe889e4c23b476f4a189ca5
-            write: 1
+          api_key: 9e90d281ed678b56b041871c3651ee2d
+          token: e80a1138e0b5ea08d506fcabe6c17196542af7ee684c6c24b6f5b79
+          board_id: 4fe889e4c23b476f4a189ca5
+          write: 1
     storage:
+      redis:
         host: localhost
         port: 6379
         db: 0
@@ -86,14 +91,23 @@ Clients have to be ``redmine`` and ``trello``, with following attributes:
     * ``api_key`` - the API key  of your Trello app
     * ``token`` - your consumer token to access Trello API
 
-For now copydog supports syncing one redmine project with one trello board at a time,
-so you need to specify ``project_id`` (string slug or integer) and ``board_id`` (string id).
+This keys can be obtained via browser, please read above sections for both redmine and trello.
+
+.. note::
+    Copydog supports syncing one redmine project with one trello board at a time,
+    so you need to specify ``project_id`` (string slug or integer) and ``board_id`` (string id).
+
 Storage config might be completely omitted if you're using default Redis connection.
 Write flag allows copydog to modify contents on a client, set it to 0
 to disable sync writes to either redmine or trello.
 
 You can optionally provide ``tracker_id`` and/or ``fixed_version_id`` in redmine
 section to limit the number of issues being synced.
+
+.. note::
+    While Redmine can handle thousands of issues painlessly, Trello is simply not
+    suited for that amount of cards per board. I recommend using ``tracker_id`` or
+    ``fixed_version_id`` filters to make better use of Trello.
 
 Running copydog
 ===============
@@ -120,11 +134,11 @@ Copydog will run in background unless you stop it::
 How it works
 ============
 Copydog polls both Redmine and Trello in turns, converting data from one service to
-the other. It queries first service for issues, updated since the last read and stores
-their identifiers and timestamps in redis. If there are any, they're converted_ into
-sister service type. Copygod tracks both new issues/cards and updates of existing ones
-by storing references to another ids. Trello cards are created with comments,
-referencing urls to corresponding redmine issues.
+the other. It queries first service for issues, updated since the last read and saves
+their identifiers and timestamps in storage. If there are any, they're converted_ into
+sister service type. Copydog tracks both new issues/cards and updates of existing ones
+by storing references between issues and cards. Trello cards are created with comments,
+featuring urls to corresponding redmine issues.
 
 .. _converted:
 
@@ -142,11 +156,21 @@ subject        name
 description    desc
 assigned_to    idMembers   Redmine doesn't support multiple assignees, the first one is taken.
 status_id      idList      Copydog maps each status to list by name
-project_id     board_id    For now, copydog allows to sync one board with one project only
+project_id     board_id    One board is synced with one project only
 due_date       due
 ============   ==========  =========
 
 Other data like priorities, comments, labels are not synced.
+
+Storage
+^^^^^^^
+Copydog needs intermediate storage to save references between issues in Redmine and Trello.
+It also stores when items were last updated to make sure we're not going to
+sync issues back and forth forever. Copydog remembers time of last sync, so it will resume
+its work from the same spot.
+
+Redis database is used for storing this data. If you wish to use another utility, you should
+write your own Storage backend.
 
 Development
 ===========
@@ -191,8 +215,7 @@ ver 0.1 (TBA)
 * Initial release
 
 
-.. _Redmine: http://redmine.org/
-.. _Trello: http://trello.com/
+.. _Redis: http://redis.io/
 .. _generate: https://trello.com/1/appKey/generate
 .. _the docs: https://trello.com/docs/gettingstarted/index.html#getting-a-token-from-a-user
 .. _signup page: https://trello.com/signup
