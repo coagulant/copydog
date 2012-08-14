@@ -18,12 +18,12 @@ class Watch(object):
         'trello': TrelloAdapter
     }
 
-    def __init__(self, config):
+    def __init__(self, config, full_sync=False):
         log.info('Copydog is on duty...')
         self.storage = StorageFactory.get(config.get('storage'))
         self.services = self.setup_services(config, self.storage)
 
-        self.setup_last_time_read(config.get('full_sync'))
+        self.setup_last_time_read(full_sync)
 
         self.mapper = Mapper(storage=self.storage, services=self.services, config=config)
         self.mapper.save_list_status_mapping()
@@ -37,7 +37,7 @@ class Watch(object):
             services[service_name] = service_class(options, storage)
         return services
 
-    def setup_last_time_read(self, full_sync):
+    def setup_last_time_read(self, full_sync=False):
         """ Ignoring last time read, when using full_sync,
             If launching for first time, make sure we're monitoring only recent changes.
 
@@ -63,6 +63,7 @@ class Watch(object):
             service_from = self.services[service_from_name]
             issues = service_from.read()
             num_issues_read = 0
+            services = list(services)
             for issue in issues:
                 if self.is_already_synced(issue):
                     continue
@@ -81,6 +82,7 @@ class Watch(object):
             thus preventing clones
         """
         last_time_synced = self.storage.get_last_time_updated(issue.client.service_name, issue)
-        log.debug('Comparing %s <= %s' % (issue.last_updated, last_time_synced))
+        log.debug('Comparing %s <= %s (%s)' % (issue.last_updated, last_time_synced,
+            (last_time_synced and issue.last_updated <= last_time_synced)))
         return last_time_synced and issue.last_updated <= last_time_synced
 

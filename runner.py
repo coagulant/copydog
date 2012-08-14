@@ -57,12 +57,10 @@ class DeamonApp(object):
 
 
 def execute(config, full_sync=False, daemonize=False):
-    config.full_sync = full_sync
-
     if not any(map(lambda item: item[1].get('write'), config.clients)):
         exit('Allow at least one client to write')
 
-    watch = Watch(config)
+    watch = Watch(config, full_sync=full_sync)
 
     if daemonize:
         app = DeamonApp()

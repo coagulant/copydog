@@ -53,6 +53,9 @@ class Storage(BaseStorage):
         return None
 
     def reset_last_time_read(self):
+        """ TODO: remove hardcoded service names
+        """
+        log.debug('Resetting last read time for full sync')
         self.redis.delete('{service_name}:last_read_time'.format(service_name='redmine'))
         self.redis.delete('{service_name}:last_read_time'.format(service_name='trello'))
 
