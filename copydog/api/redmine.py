@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 from logging import getLogger
-from .common import ApiObject, ApiException, ApiClient
+from .base import ApiObject, ApiException, ApiClient
 log = getLogger('copydog.api')
 
 
