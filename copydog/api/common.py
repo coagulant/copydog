@@ -87,7 +87,7 @@ class ApiClient(object):
             log.error('Request failed: %s', e.response.content)
             raise e
 
-        if response.json:
+        if response.json is not None:
             return response.json
         else:
             if expect_json:
