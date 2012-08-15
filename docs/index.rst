@@ -19,6 +19,8 @@ Installation
 
 Git clone the repo https://github.com/coagulant/copydog.git
 You also need a Redis_ instance to store intermediate results of syncronization.
+For best experience please install Pandoc_ to convert issues descriptions
+between Markdown and Textile.
 
 Copydog is not yet available as package, so please install dependencies
 manualy (they're listed in setup.py).
@@ -80,8 +82,11 @@ Here is how config file might look like:
         port: 6379
         db: 0
         password:None
+    copydog:
+      pandoc: '/usr/bin/pandoc'
 
-Note, how config is separated into ``clients`` and ``storage`` sections.
+Note, how config is separated into sections: ``clients``, ``storage`` and ``copydog``.
+First one is required, other are completely optional.
 Clients have to be ``redmine`` and ``trello``, with following attributes:
 
 * ``redmine``
@@ -108,6 +113,7 @@ section to limit the number of issues being synced.
     While Redmine can handle thousands of issues painlessly, Trello is simply not
     suited for that amount of cards per board. I recommend using ``tracker_id`` or
     ``fixed_version_id`` filters to make better use of Trello.
+
 
 Running copydog
 ===============
@@ -153,7 +159,7 @@ Assigned members are linked by username or full name as a fallback.
 Redmine        Trello      Comment
 ============   ==========  =========
 subject        name
-description    desc
+description    desc        Text is converted with `pandoc`_, if available. See :ref:`markup-conversion`
 assigned_to    idMembers   Redmine doesn't support multiple assignees, the first one is taken.
 status_id      idList      Copydog maps each status to list by name
 project_id     board_id    One board is synced with one project only
@@ -161,6 +167,23 @@ due_date       due
 ============   ==========  =========
 
 Other data like priorities, comments, labels are not synced.
+
+.. _markup-conversion:
+
+Markup conversion
+~~~~~~~~~~~~~~~~~
+Copydog tries to use Pandoc_ tool to convert issue text between between services.
+For example, Trello understands Markdown_ and Redmine uses Textile_.
+If you dont' have pandoc installed, issues texts would be transferered as is.
+This not always nice looking, so I advice you to install pandoc anyway.
+
+You can provide a path to pandoc binary in config under ``copydog`` section ::
+
+    copydog:
+      pandoc: '/usr/bin/pandoc'
+
+.. _Markdown: http://daringfireball.net/projects/markdown/
+.. _Textile: http://textile.thresholdstate.com/
 
 Storage
 ^^^^^^^
@@ -219,5 +242,6 @@ ver 0.1 (TBA)
 .. _generate: https://trello.com/1/appKey/generate
 .. _the docs: https://trello.com/docs/gettingstarted/index.html#getting-a-token-from-a-user
 .. _signup page: https://trello.com/signup
+.. _pandoc: http://johnmacfarlane.net/pandoc
 
 

@@ -5,6 +5,7 @@ from api.trello import Trello
 from api.redmine import Redmine
 from copydog.api.redmine import Issue
 from copydog.api.trello import Card
+from copydog.utils import pandoc
 
 log = getLogger('copydog')
 pp = pprint.PrettyPrinter(indent=4)
@@ -95,7 +96,7 @@ class RedmineAdapter(BaseAdapter):
             id = self.storage.get_opposite_item_id(service_from, foreign_issue.id),
             assigned_to_id = assigned_to_id,
             subject = foreign_issue.name,
-            description = foreign_issue.desc,
+            description = pandoc.convert(foreign_issue.desc, 'markdown', 'textile'),
             status_id = self.storage.get_list_or_status_id(service_from, foreign_issue.idList),
             project_id = self.config.get('project_id'),
             tracker_id = self.config.get('tracker_id'),
@@ -134,7 +135,7 @@ class TrelloAdapter(BaseAdapter):
             id = self.storage.get_opposite_item_id(service_from, foreign_issue.id),
             idMembers = idMembers,
             name = foreign_issue.subject,
-            desc = foreign_issue.get('description'),
+            desc = pandoc.convert(foreign_issue.get('description'), 'textile', 'markdown'),
             idList = self.storage.get_list_or_status_id(service_from, foreign_issue.status['id']),
             idBoard = self.config.board_id,
             due = foreign_issue.get('due_date', 'null'),

@@ -5,3 +5,5 @@ clients:
     trello:
         board_id: 4fe889e4c23b476f4a189ca5
         write: 1
+copydog:
+    pandoc: '/usr/bin/pandoc'

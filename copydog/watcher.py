@@ -3,6 +3,7 @@ from logging import getLogger
 import time
 import sched
 import itertools
+from copydog.utils import pandoc
 from copydog.adapters import RedmineAdapter, TrelloAdapter
 from copydog.convertor import Mapper
 from copydog.storage.factory import StorageFactory
@@ -22,12 +23,17 @@ class Watch(object):
         log.info('Copydog is on duty...')
         self.storage = StorageFactory.get(config.get('storage'))
         self.services = self.setup_services(config, self.storage)
-
+        self.setup_copydog(config.get('copydog'))
         self.setup_last_time_read(full_sync)
-
         self.mapper = Mapper(storage=self.storage, services=self.services, config=config)
         self.mapper.save_list_status_mapping()
         self.mapper.save_user_member_mapping()
+
+    def setup_copydog(self, options=False):
+        if not options:
+            return
+        if options.get('pandoc'):
+            pandoc.PANDOC_PATH = options.get('pandoc')
 
     def setup_services(self, config, storage):
         clients_config = config.clients
