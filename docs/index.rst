@@ -84,6 +84,7 @@ Here is how config file might look like:
         password:None
     copydog:
       pandoc: '/usr/bin/pandoc'
+      beat: 60
 
 Note, how config is separated into sections: ``clients``, ``storage`` and ``copydog``.
 First one is required, other are completely optional.
@@ -113,6 +114,11 @@ section to limit the number of issues being synced.
     While Redmine can handle thousands of issues painlessly, Trello is simply not
     suited for that amount of cards per board. I recommend using ``tracker_id`` or
     ``fixed_version_id`` filters to make better use of Trello.
+
+By default copydog polls servers every minute. Is not a big burden for external
+APIs and sufficient to stay up to date. If it doesn't suite your needs, feel free to change
+the beat frequency under ``copydog`` section in config (it's called ``beat`` and is measured in seconds between
+polls.
 
 
 Running copydog

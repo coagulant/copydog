@@ -8,7 +8,7 @@ setup(
     packages=['copydog', 'copydog.api', 'copydog.utils'],
     install_requires=[
         'requests==0.13.6',
-        'redis==2.6',
+        'redis==2.6.2',
         'python-dateutil==2.1',
         'pytz==2012c',
         'docopt==0.4.1',

@@ -19,8 +19,12 @@ class Watch(object):
         'trello': TrelloAdapter
     }
 
-    def __init__(self, config, full_sync=False):
+    def __init__(self, config=None, full_sync=None):
         log.info('Copydog is on duty...')
+        if config:
+            self.setup(config, full_sync)
+
+    def setup(self, config, full_sync=False):
         self.storage = StorageFactory.get(config.get('storage'))
         self.services = self.setup_services(config, self.storage)
         self.setup_copydog(config.get('copydog'))
@@ -32,8 +36,8 @@ class Watch(object):
     def setup_copydog(self, options=False):
         if not options:
             return
-        if options.get('pandoc'):
-            pandoc.PANDOC_PATH = options.get('pandoc')
+        pandoc.PANDOC_PATH = options.get('pandoc', '/usr/bin/pandoc')
+        self.beat_interval = options.get('beat', 60)
 
     def setup_services(self, config, storage):
         clients_config = config.clients
@@ -57,11 +61,11 @@ class Watch(object):
                 self.storage.mark_read('trello')
 
     def run(self):
-        """ Run copydog in a loop, starting sync every 60 seconds.
+        """ Run copydog in a loop, starting sync every N seconds (60 is default).
         """
-        scheduler = sched.scheduler(time.time, time.sleep)
-        periodic(scheduler, 60, self.sync)
-        scheduler.run()
+        self.scheduler = sched.scheduler(time.time, time.sleep)
+        periodic(self.scheduler, self.beat_interval, self.sync)
+        self.scheduler.run()
 
     def sync(self):
         groups = itertools.groupby(itertools.permutations(self.services, 2), lambda pair:pair[0])
