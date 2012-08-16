@@ -177,7 +177,7 @@ Other data like priorities, comments, labels are not synced.
 .. _markup-conversion:
 
 Markup conversion
-~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^
 Copydog tries to use Pandoc_ tool to convert issue text between between services.
 For example, Trello understands Markdown_ and Redmine uses Textile_.
 If you dont' have pandoc installed, issues texts would be transferered as is.
