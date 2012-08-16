@@ -183,7 +183,9 @@ For example, Trello understands Markdown_ and Redmine uses Textile_.
 If you dont' have pandoc installed, issues texts would be transferered as is.
 This not always nice looking, so I advice you to install pandoc anyway.
 
-You can provide a path to pandoc binary in config under ``copydog`` section ::
+You can provide a path to pandoc binary in config under ``copydog`` section.
+
+.. code-block:: yaml
 
     copydog:
       pandoc: '/usr/bin/pandoc'
