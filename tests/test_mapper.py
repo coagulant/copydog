@@ -2,23 +2,21 @@
 from unittest import TestCase
 import datetime
 from mock import Mock, patch
+from copydog.adapters import RedmineAdapter, TrelloAdapter
 from copydog.api.redmine import Issue
 from copydog.convertor import Mapper
 from copydog.api.trello import Card
 from copydog.utils.config import Config
 config = Config(file='examples/copydog.yml')
+redmine_options = config.clients.redmine
+trello_options = config.clients.trello
 
 
 class IssueToCardTest(TestCase):
 
     def setUp(self):
         self.storage_mock = Mock()
-        self.mapper = Mapper(config=config,
-            storage=self.storage_mock,
-            services={
-                'redmine': Mock(return_value='redmine'),
-                'trello': Mock(return_value='trello')
-        })
+        self.adapter = TrelloAdapter(trello_options, self.storage_mock)
         self.issue = Issue(**{
             'id': 6571,
             'subject': 'Save humanity',
@@ -30,7 +28,7 @@ class IssueToCardTest(TestCase):
 
     @property
     def trello_card(self):
-        return self.mapper.issue_to_trello(self.issue)
+        return self.adapter.convert_to_local_issue(self.issue)
 
     def test_new_card_id(self):
         self.storage_mock.get_opposite_item_id.return_value = '777'
@@ -44,33 +42,32 @@ class IssueToCardTest(TestCase):
         self.assertEqual(self.trello_card.name, 'Save humanity')
 
     def test_card_desc(self):
-        self.assertEqual(self.trello_card.desc, 'Humanity in danger')
+        self.assertEqual(self.trello_card.desc.strip(), 'Humanity in danger')
 
     def test_id_list(self):
         self.storage_mock.get_list_or_status_id.return_value = '123'
         self.assertEqual(self.trello_card.idList, '123')
 
-    @patch.object(config, 'get')
-    def test_idBoard(self, config_get_mock):
-        config_get_mock.return_value = '1fe889e4c23b476f4a189ca5'
+    @patch.object(trello_options, 'board_id', '1fe889e4c23b476f4a189ca5')
+    def test_idBoard(self):
         self.assertEqual(self.trello_card.idBoard, '1fe889e4c23b476f4a189ca5')
 
     def test_due(self):
         self.assertEqual(self.trello_card.due, datetime.date(2012, 12, 20))
 
     def test_client(self):
-        self.assertEqual(self.trello_card.client(), 'trello')
+        self.assertEqual(self.trello_card.client.service_name, 'trello')
+
+
+
+
 
 
 class CardToIssueTest(TestCase):
     def setUp(self):
         self.storage_mock = Mock()
-        self.mapper = Mapper(config=config,
-            storage=self.storage_mock,
-            clients={
-                'redmine': Mock(return_value='redmine'),
-                'trello': Mock(return_value='trello')
-            })
+        options = Config({'host': 'xxx', 'api_key': 'yyy'})
+        self.adapter = RedmineAdapter(redmine_options, self.storage_mock)
         self.issue = Card(**{
             'id': 'a84d79f572fbe7512b999c6b3cd7667cbe3138ff',
             'name': 'Destroy humanity',
@@ -82,7 +79,7 @@ class CardToIssueTest(TestCase):
 
     @property
     def redmine_issue(self):
-        return self.mapper.card_to_redmine(self.issue)
+        return self.adapter.convert_to_local_issue(self.issue)
 
     def test_new_issue_id(self):
         self.storage_mock.get_opposite_item_id.return_value = '555'
@@ -96,20 +93,19 @@ class CardToIssueTest(TestCase):
         self.assertEqual(self.redmine_issue.subject, 'Destroy humanity')
 
     def test_issue_description(self):
-        self.assertEqual(self.redmine_issue.description, 'Humanity in our enemy')
+        self.assertEqual(self.redmine_issue.description.strip(), 'Humanity in our enemy')
 
     def test_status(self):
         self.storage_mock.get_list_or_status_id.return_value = '123'
         self.assertEqual(self.redmine_issue.status_id, '123')
 
-    @patch.object(config, 'get')
-    def test_project_id(self, config_get_mock):
-        config_get_mock.return_value = 7
+    @patch.object(redmine_options, 'project_id', 7)
+    def test_project_id(self):
         self.assertEqual(self.redmine_issue.project_id, 7)
 
     def test_due_date(self):
         self.assertEqual(self.redmine_issue.due_date, datetime.date(1990, 1, 1))
 
     def test_client(self):
-        self.assertEqual(self.redmine_issue.client(), 'redmine')
+        self.assertEqual(self.redmine_issue.client.service_name, 'redmine')
 

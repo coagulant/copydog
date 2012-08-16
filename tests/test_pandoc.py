@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from unittest.case import TestCase
+from unittest import TestCase
 from mock import patch
 from nose.plugins.attrib import attr
 from copydog.utils.pandoc import convert

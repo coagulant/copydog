@@ -98,7 +98,7 @@ class RedmineAdapter(BaseAdapter):
             subject = foreign_issue.name,
             description = pandoc.convert(foreign_issue.desc, 'markdown', 'textile'),
             status_id = self.storage.get_list_or_status_id(service_from, foreign_issue.idList),
-            project_id = self.config.get('project_id'),
+            project_id = self.config.project_id,
             tracker_id = self.config.get('tracker_id'),
             due_date = foreign_issue.get('due'),
             client = self.client
