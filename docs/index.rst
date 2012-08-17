@@ -32,6 +32,8 @@ Configuration
 
 For copydog to work you need both Trello and Redmine accounts.
 
+.. _trello-config:
+
 Trello
 ^^^^^^
 If you don't have an account, head over to `signup page`_ and register.
@@ -48,6 +50,7 @@ After that you need to obtain you API key and user token.
 
         https://trello.com/1/authorize?key=substitutewithyourapplicationkey&name=My+Application&expiration=never&response_type=token&scope=read,write
 
+.. _redmine-config:
 
 Redmine
 ^^^^^^^
@@ -97,7 +100,8 @@ Clients have to be ``redmine`` and ``trello``, with following attributes:
     * ``api_key`` - the API key  of your Trello app
     * ``token`` - your consumer token to access Trello API
 
-This keys can be obtained via browser, please read above sections for both redmine and trello.
+This keys can be obtained via browser, please read above sections for both :ref:`Redmine <redmine-config>`
+and :ref:`Trello <trello-config>`.
 
 .. note::
     Copydog supports syncing one redmine project with one trello board at a time,
@@ -165,10 +169,10 @@ Assigned members are linked by username or full name as a fallback.
 Redmine        Trello      Comment
 ============   ==========  =========
 subject        name
-description    desc        Text is converted with `pandoc`_, if available. See :ref:`markup-conversion`
+description    desc        Text is converted with `pandoc`_, if available. See :ref:`markup-conversion`.
 assigned_to    idMembers   Redmine doesn't support multiple assignees, the first one is taken.
-status_id      idList      Copydog maps each status to list by name
-project_id     board_id    One board is synced with one project only
+status_id      idList      Copydog maps each status to list by name.
+project_id     board_id    One board is synced with one project only.
 due_date       due
 ============   ==========  =========
 
@@ -178,12 +182,13 @@ Other data like priorities, comments, labels are not synced.
 
 Markup conversion
 ^^^^^^^^^^^^^^^^^
-Copydog tries to use Pandoc_ tool to convert issue text between between services.
+Copydog tries to use Pandoc_ tool to convert issue text between services.
 For example, Trello understands Markdown_ and Redmine uses Textile_.
-If you dont' have pandoc installed, issues texts would be transferered as is.
-This not always nice looking, so I advice you to install pandoc anyway.
+If you don't have pandoc installed, texts will be transferred as is.
+It doesn't always look nice, so I advise you to install pandoc anyway.
 
-You can provide a path to pandoc binary in config under ``copydog`` section.
+You should provide a path to pandoc binary in config under ``copydog`` section
+to make it work.
 
 .. code-block:: yaml
 
@@ -196,12 +201,12 @@ You can provide a path to pandoc binary in config under ``copydog`` section.
 Storage
 ^^^^^^^
 Copydog needs intermediate storage to save references between issues in Redmine and Trello.
-It also stores when items were last updated to make sure we're not going to
+It also save datetime when items were last updated to make sure we're not going to
 sync issues back and forth forever. Copydog remembers time of last sync, so it will resume
 its work from the same spot.
 
-Redis database is used for storing this data. If you wish to use another utility, you should
-write your own Storage backend.
+Redis database is used for storing this data. If you wish to use another storage, you should
+write your own backend.
 
 Development
 ===========
