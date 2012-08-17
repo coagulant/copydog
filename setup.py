@@ -22,6 +22,10 @@ setup(
         'sphinx==1.1.3',
         'tox==1.4.2',
     ],
+    entry_points={
+        "console_scripts": [
+            'copydog = copydog.bin.runner:main'
+    ]},
     url='https://github.com/coagluant/copydog',
     license='MIT',
     author='coagulant',

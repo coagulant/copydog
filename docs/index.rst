@@ -17,13 +17,17 @@ You might find this tool useful after reading `How it works`_.
 Installation
 ============
 
-Git clone the repo https://github.com/coagulant/copydog.git
-You also need a Redis_ instance to store intermediate results of syncronization.
-For best experience please install Pandoc_ to convert issues descriptions
-between Markdown and Textile.
+Copydog is available via PyPI::
 
-Copydog is not yet available as package, so please install dependencies
-manualy (they're listed in setup.py).
+    pip install copydog
+
+You also need a Redis_ instance to store intermediate results of syncronization.
+Follow `installation instructions`_.
+
+.. _installation instructions: http://redis.io/download
+
+For best experience please install Pandoc_ to convert issues descriptions
+between Markdown and Textile. However, it's optional.
 
 Copydog runs on python 2.6-2.7 only. Python 3 support is planned in future releases.
 
@@ -129,23 +133,23 @@ Running copydog
 ===============
 To launch the app::
 
-    python runner.py --config=<path_to_your_yaml_config>
+    copydog --config=<path_to_your_yaml_config>
 
 Copydog will start monitoring `new` changes in both services and mirror them accordingly.
 If you wish to sync all existing issues/card, use ``--fullsync`` option::
 
-    python runner.py --fullsync --config=<path_to_your_yaml_config>
+    copydog --fullsync --config=<path_to_your_yaml_config>
 
 Deamon
 ^^^^^^
 If you're not developing copydog it's useful to run it as daemon process.
 To daemonize copydog, run it with a ``start`` argument::
 
-    python runner.py start --config=<path_to_your_yaml_config>
+    copydog start --config=<path_to_your_yaml_config>
 
 Copydog will run in background unless you stop it::
 
-    python runner.py stop --config=<path_to_your_yaml_config>
+    copydog stop --config=<path_to_your_yaml_config>
 
 How it works
 ============
@@ -246,8 +250,8 @@ REST API references
 
 Changelog
 =========
-ver 0.1 (TBA)
-^^^^^^^^^^^^^
+ver 0.1 (2012-08-18)
+^^^^^^^^^^^^^^^^^^^^
 * Initial release
 
 

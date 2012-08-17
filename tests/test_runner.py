@@ -3,7 +3,7 @@ from unittest import TestCase
 from mock import patch
 from copydog.utils.config import Config
 from copydog.watcher import Watch
-from runner import execute
+from copydog.bin.runner import execute
 
 
 @patch('runner.Watch', spec=Watch)
