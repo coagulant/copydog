@@ -1,3 +1,4 @@
 include README.rst
 include LICENCE
 include tests/*.py
+include examples/*.yml
