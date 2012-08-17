@@ -137,6 +137,23 @@ div.sphinxsidebar input {
     font-size: 1em;
 }
 
+.copydog-links {
+    margin-top: 30px;
+}
+
+.copydog-links li {
+    font-size: 18px;
+    padding-left: 42px;
+    padding-bottom: 10px;
+}
+
+.copydog-github {
+    background: url('github-icon.png') no-repeat;
+}
+.copydog-trello {
+    background: url('trello-icon.png')  no-repeat;
+}
+
 /* -- body styles ----------------------------------------------------------- */
 
 a {
