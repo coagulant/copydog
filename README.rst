@@ -1,5 +1,5 @@
-Copydog: redmine and trello integration
-=======================================
+Copydog
+-------
 
 Copydog converts issues between Redmine and Trello on the fly.
 It's a small third-party daemon, monitoring changes in both systems and keeping
