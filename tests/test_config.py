@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import mock
 import os
 import unittest
 if not hasattr(unittest.TestCase, 'assertRaisesRegexp'):
@@ -63,6 +64,6 @@ class ConfigAttrTest(unittest.TestCase):
             self.assertTrue(type(service) is str)
             self.assertTrue(type(config) is Config)
 
+    @mock.patch.dict('os.environ', {'COPYDOG_REDMINE_API_KEY': 'XXX'})
     def test_env_fallback(self):
-        os.environ['COPYDOG_REDMINE_API_KEY'] = 'XXX'
         self.assertEqual(self.config.clients.redmine.api_key, 'XXX')

@@ -7,7 +7,7 @@ from copydog.api.redmine import Issue
 from copydog.convertor import Mapper
 from copydog.api.trello import Card
 from copydog.utils.config import Config
-config = Config(file='examples/copydog.yml')
+config = Config(file='tests/test.yml')
 redmine_options = config.clients.redmine
 trello_options = config.clients.trello
 

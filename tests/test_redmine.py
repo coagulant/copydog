@@ -15,8 +15,8 @@ class TestRedmine(TestCase):
     """
 
     def setUp(self):
-        self.r = Redmine(host=os.environ.get('REDMINE_HOST'),
-                         api_key=os.environ.get('REDMINE_API_KEY'))
+        self.r = Redmine(host=os.environ.get('COPYDOG_REDMINE_HOST'),
+                         api_key=os.environ.get('COPYDOG_REDMINE_API_KEY'))
 
     def test_connect_public_api(self):
         r = Redmine(host='http://redmine.org')

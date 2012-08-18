@@ -12,8 +12,8 @@ class TestTrello(TestCase):
     """
 
     def setUp(self):
-        self.trello = Trello(api_key=os.environ.get('TRELLO_API_KEY'),
-                             token=os.environ.get('TRELLO_TOKEN'),
+        self.trello = Trello(api_key=os.environ.get('COPYDOG_TRELLO_API_KEY'),
+                             token=os.environ.get('COPYDOG_TRELLO_TOKEN'),
         )
         self.board_id = '4d5ea62fd76aa1136000000c'
 
