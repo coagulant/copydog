@@ -26,8 +26,8 @@ setup(
         "console_scripts": [
             'copydog = copydog.bin.runner:main'
     ]},
-    url='https://github.com/coagluant/copydog',
-    license='MIT',
+    url='http://copydog.readthedocs.org/',
+    license='BSD',
     author='coagulant',
     author_email='baryshev@gmail.com',
     description='Copies issues between Redmine and Trello on the fly',
