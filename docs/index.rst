@@ -75,20 +75,20 @@ Here is how config file might look like:
     clients:
       redmine:
         host: http://redmine.org
-          api_key: ac7785e2c593ad6d7f539f2f90be26ba0851d18a
-          project_id: playground
-          write: 1
-        trello:
-          api_key: 9e90d281ed678b56b041871c3651ee2d
-          token: e80a1138e0b5ea08d506fcabe6c17196542af7ee684c6c24b6f5b79
-          board_id: 4fe889e4c23b476f4a189ca5
-          write: 1
+        api_key: ac7785e2c593ad6d7f539f2f90be26ba0851d18a
+        project_id: playground
+        write: 1
+      trello:
+        api_key: 9e90d281ed678b56b041871c3651ee2d
+        token: e80a1138e0b5ea08d506fcabe6c17196542af7ee684c6c24b6f5b79
+        board_id: 4fe889e4c23b476f4a189ca5
+        write: 1
     storage:
       redis:
         host: localhost
         port: 6379
         db: 0
-        password:None
+        password: null
     copydog:
       pandoc: '/usr/bin/pandoc'
       beat: 60
