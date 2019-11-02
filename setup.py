@@ -12,7 +12,7 @@ setup(
         'python-dateutil==2.1',
         'pytz==2012c',
         'docopt==0.4.1',
-        'PyYAML==3.10',
+        'PyYAML==5.1',
         'python-daemon==1.6',
         'texttable==0.8.1',
     ],
